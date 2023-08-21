@@ -1,0 +1,99 @@
+buildscript {
+	ext {
+		springBootVersion = '3.1.2'
+	}
+	repositories {
+		mavenCentral()
+	}
+}
+
+plugins {
+	id("java")
+	id("java-library")
+	id("maven-publish")
+	id("idea")
+}
+
+sourceCompatibility = 17
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	testAnnotationProcessor.extendsFrom(annotationProcessor)
+}
+
+dependencies {
+	implementation(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
+	annotationProcessor(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
+	compileOnly(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
+	constraints {
+		api 'org.apache.ddlutils:ddlutils:1.0'
+		implementation 'com.google.guava:guava:29.0-jre'
+	}
+
+	api('org.apache.ddlutils:ddlutils') {
+		exclude group: 'junit', module: 'junit'
+		exclude group: 'xerces', module: 'xerces'
+	}
+
+
+	// Spring boot
+	implementation('org.hibernate.orm:hibernate-core')
+	implementation('org.slf4j:slf4j-api')
+	implementation('org.springframework.boot:spring-boot-autoconfigure')
+	implementation('org.springframework:spring-jdbc')
+
+	implementation('com.google.guava:guava')
+
+    // Lombok
+    compileOnly('org.projectlombok:lombok')
+	testCompileOnly('org.projectlombok:lombok')
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+
+	// Spring boot
+	testImplementation('org.springframework.boot:spring-boot-starter-data-jpa')
+
+	testImplementation('com.h2database:h2')
+	testRuntimeOnly('org.postgresql:postgresql')
+	testImplementation('org.hibernate.orm:hibernate-envers')
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+
+    //Annotation processing from mapstruct and lombok
+	annotationProcessor("org.projectlombok:lombok")
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+task sourceJar(type: Jar) {
+	from sourceSets.main.allJava
+}
+
+test {
+	useJUnitPlatform()
+}
+
+group = System.getenv("PROJECT_GROUP") ?: 'com.dtforce.migen'
+version = System.getenv("PROJECT_VERSION") ?: 'latest'
+
+publishing {
+	repositories {
+		maven {
+			name = "GitHubPackages"
+			url = uri("https://maven.pkg.github.com/dtforce/migen")
+			credentials {
+				username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+				password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+			}
+		}
+	}
+	publications {
+		gpr(MavenPublication) {
+			from(components.java)
+		}
+	}
+}

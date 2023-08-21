@@ -1,0 +1,15 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:10
+    command: >
+      -c max_connections=200
+      -c shared_buffers=2GB
+      -c effective_cache_size=4GB
+      -c maintenance_work_mem=1GB
+      -c max_wal_size=2GB
+    ports:
+      - "5432:5432"
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres

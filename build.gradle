@@ -77,7 +77,7 @@ test {
 	useJUnitPlatform()
 }
 
-group = System.getenv("PROJECT_GROUP") ?: 'com.dtforce.migen'
+group = 'com.dtforce.migen'
 version = System.getenv("PROJECT_VERSION") ?: 'latest'
 
 publishing {
@@ -86,8 +86,8 @@ publishing {
 			name = "GitHubPackages"
 			url = uri("https://maven.pkg.github.com/dtforce/migen")
 			credentials {
-				username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-				password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+				username = project.findProperty("githubUser") ?: System.getenv("GITHUB_USER")
+				password = project.findProperty("githubToken") ?: System.getenv("GITHUB_TOKEN")
 			}
 		}
 	}

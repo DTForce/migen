@@ -16,6 +16,7 @@
 
 package com.dtforce.migen.ddl;
 
+import lombok.Getter;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.ddlutils.model.Index;
@@ -29,19 +30,11 @@ import java.util.Collection;
 public class FilterIndexDef extends IndexImpBase
 {
 
-	private boolean isUnique = false;
+	private final boolean isUnique;
 
-	private String filterCondition;
+	@Getter
+	private final String filterCondition;
 
-	public FilterIndexDef(final String name, final boolean isUnique, final String filterCondition)
-	{
-		this._name = name;
-		this._columns = new ArrayList<>(5);
-		this.isUnique = isUnique;
-		this.filterCondition = filterCondition;
-	}
-
-	@SuppressWarnings("unchecked")
 	private FilterIndexDef(
 		final String name,
 		final Collection<IndexColumn> columns,
@@ -63,7 +56,7 @@ public class FilterIndexDef extends IndexImpBase
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object clone() throws CloneNotSupportedException
+	public Object clone()
 	{
 		FilterIndexDef result = new FilterIndexDef(_name, (Collection<IndexColumn>)_columns, isUnique, filterCondition);
 
@@ -76,9 +69,7 @@ public class FilterIndexDef extends IndexImpBase
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj instanceof FilterIndexDef) {
-			FilterIndexDef other = (FilterIndexDef)obj;
-
+		if (obj instanceof final FilterIndexDef other) {
 			return new EqualsBuilder()
 				.append(_name,    other._name)
 				.append(_columns, other._columns)
@@ -104,16 +95,15 @@ public class FilterIndexDef extends IndexImpBase
 	@Override
 	public boolean equalsIgnoreCase(final Index other)
 	{
-		if (other instanceof FilterIndexDef)
+		if (other instanceof final FilterIndexDef otherIndex)
 		{
-			FilterIndexDef otherIndex = (FilterIndexDef)other;
 
 			if (this.isUnique != ((FilterIndexDef) other).isUnique) {
 				return false;
 			}
 
-			boolean checkName = (_name != null) && (_name.length() > 0) &&
-								(otherIndex._name != null) && (otherIndex._name.length() > 0);
+			boolean checkName = (_name != null) && (!_name.isEmpty()) &&
+								(otherIndex._name != null) && (!otherIndex._name.isEmpty());
 
 			if (filterCondition != null && !filterCondition.equalsIgnoreCase(otherIndex.filterCondition)) {
 				return false;
@@ -142,21 +132,13 @@ public class FilterIndexDef extends IndexImpBase
 	@Override
 	public String toString()
 	{
-		StringBuffer result = new StringBuffer();
-
-		result.append("Native index [name=");
-		result.append(getName());
-		result.append("; ");
-		result.append(getColumnCount());
-		result.append(" columns]");
-
-		return result.toString();
+		return "Native index [name=" + getName() + "; " + getColumnCount() + " columns]";
 	}
 
 	@Override
 	public String toVerboseString()
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 
 		result.append("Native index [");
 		result.append(getName());
@@ -168,11 +150,6 @@ public class FilterIndexDef extends IndexImpBase
 		}
 
 		return result.toString();
-	}
-
-	public String getFilterCondition()
-	{
-		return filterCondition;
 	}
 
 	public static FilterIndexDef fromIndex(final Index index, final String filterCondition)

@@ -16,6 +16,7 @@
 
 package com.dtforce.migen.ddl;
 
+import lombok.Getter;
 import org.apache.ddlutils.alteration.ColumnDataTypeChange;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Database;
@@ -23,14 +24,15 @@ import org.apache.ddlutils.model.Table;
 
 import java.sql.Types;
 
+@Getter
 public class ColumnRawTypeChanged extends ColumnDataTypeChange
 {
 
-	private String rawType;
+	private final String rawType;
 
-	private Column column;
+	private final Column column;
 
-	private Table table;
+	private final Table table;
 
 	/**
 	 * Creates a new change object.
@@ -39,11 +41,7 @@ public class ColumnRawTypeChanged extends ColumnDataTypeChange
 	 * @param column  The column
 	 * @param rawType The JDBC type code of the new type
 	 */
-	public ColumnRawTypeChanged(
-			Table table,
-			RawTypedColumn column,
-			String rawType
-	)
+	public ColumnRawTypeChanged(Table table, RawTypedColumn column, String rawType)
 	{
 		super(table, column, Types.OTHER);
 		this.table = table;

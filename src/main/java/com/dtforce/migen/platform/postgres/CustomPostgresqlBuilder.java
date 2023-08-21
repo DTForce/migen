@@ -51,9 +51,9 @@ import java.util.Map;
 public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenSqlBuilder
 {
 
-	private CustomPostgreSqlPlatform platform;
+	private final CustomPostgresqlPlatform platform;
 
-	public CustomPostgresqlBuilder(CustomPostgreSqlPlatform platform)
+	public CustomPostgresqlBuilder(CustomPostgresqlPlatform platform)
 	{
 		super(platform.getWrappedPlatform());
 		this.platform = platform;
@@ -77,7 +77,7 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 			Database currentModel,
 			Database desiredModel,
 			CreationParameters params,
-			@SuppressWarnings("rawtypes") Collection changes
+			Collection changes
 	) throws IOException
 	{
 		ListOrderedMap changesPerTable = new ListOrderedMap();
@@ -106,7 +106,7 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 
 		// We're using a copy of the current model so that the table structure changes can
 		// modify it
-		Database copyOfCurrentModel = null;
+		final Database copyOfCurrentModel;
 
 		try {
 			copyOfCurrentModel = (Database) currentModel.clone();
@@ -135,8 +135,8 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 			Database desiredModel,
 			Table sourceTable,
 			Table targetTable,
-			@SuppressWarnings("rawtypes") Map parameters,
-			@SuppressWarnings("rawtypes") List changes
+			Map parameters,
+			List changes
 	) throws IOException
 	{
 		@SuppressWarnings("unchecked")
@@ -153,8 +153,7 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 				processTypeChange(currentModel, desiredModel, (ColumnSizeChange) change);
 			} else if (change instanceof ColumnRequiredChange) {
 				processChange(currentModel, desiredModel, (ColumnRequiredChange) change);
-			} else if (change instanceof AddColumnChange) {
-				AddColumnChange addColumnChange = (AddColumnChange) change;
+			} else if (change instanceof final AddColumnChange addColumnChange) {
 				if (addColumnChange.getNewColumn().isRequired() &&
 					!addColumnChange.getNewColumn().isAutoIncrement() &&
 					(addColumnChange.getNewColumn().getDefaultValue() == null)) {
@@ -198,8 +197,8 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 			Database currentModel,
 			Database desiredModel,
 			String tableName,
-			@SuppressWarnings("rawtypes") Map parameters,
-			@SuppressWarnings("rawtypes") List changes
+			Map parameters,
+			List changes
 	) throws IOException
 	{
 		Table sourceTable = currentModel.findTable(tableName, getPlatform().isDelimitedIdentifierModeOn());
@@ -214,11 +213,10 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 
 			@SuppressWarnings("unchecked")
 			Iterator<TableChange> it = (Iterator<TableChange>)changes.iterator();
-			for (; canMigrateData && it.hasNext();) {
+			while (canMigrateData && it.hasNext()) {
 				TableChange change = it.next();
 
-				if (change instanceof AddColumnChange) {
-					AddColumnChange addColumnChange = (AddColumnChange) change;
+				if (change instanceof final AddColumnChange addColumnChange) {
 
 					if (addColumnChange.getNewColumn().isRequired() &&
 						!addColumnChange.getNewColumn().isAutoIncrement() &&
@@ -407,9 +405,8 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 
 	@Override
 	@SneakyThrows
-	public boolean writeSqlColumnType(Column column) {
+	public void writeSqlColumnType(Column column) {
 		this.print(this.getSqlType(column));
-		return true;
 	}
 
 }

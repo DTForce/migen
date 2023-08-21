@@ -25,5 +25,5 @@ public interface MetadataAdapter
 {
 	Database getSchemaDatabase();
 
-	Map<String,String> getTypeMappping();
+	Map<String,String> getTypeMapping();
 }

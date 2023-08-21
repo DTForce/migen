@@ -33,13 +33,13 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class CustomPostgreSqlPlatform implements MigenPlatform
+public class CustomPostgresqlPlatform implements MigenPlatform
 {
 
 	@Getter(AccessLevel.PACKAGE)
-	private PlatformImplBase wrappedPlatform;
+	private final PlatformImplBase wrappedPlatform;
 
-	public CustomPostgreSqlPlatform(Map<String, String> platformTypeMapping)
+	public CustomPostgresqlPlatform(Map<String, String> platformTypeMapping)
 	{
 		wrappedPlatform = new DdlUtilsWrapper(platformTypeMapping, this);
 	}
@@ -76,7 +76,7 @@ public class CustomPostgreSqlPlatform implements MigenPlatform
 	private static class DdlUtilsWrapper extends PostgreSqlPlatform
 	{
 
-		private DdlUtilsWrapper(Map<String, String> platformTypeMapping, CustomPostgreSqlPlatform platform)
+		private DdlUtilsWrapper(Map<String, String> platformTypeMapping, CustomPostgresqlPlatform platform)
 		{
 			super();
 			setModelReader(new CustomPostgresqlModelReader(this, platformTypeMapping));

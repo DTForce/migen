@@ -20,7 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.service.spi.SessionFactoryServiceRegistry;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 
 @Getter
 @Setter
@@ -33,7 +33,7 @@ public class HibernateInfoHolder
 
 	private SessionFactoryImplementor sessionFactory;
 
-	private SessionFactoryServiceRegistry serviceRegistry;
+	private ServiceRegistryImplementor serviceRegistry;
 
 	private HibernateInfoHolder()
 	{

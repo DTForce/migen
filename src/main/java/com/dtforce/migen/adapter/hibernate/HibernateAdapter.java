@@ -79,7 +79,7 @@ public class HibernateAdapter implements MetadataAdapter
 	}
 
 	@Override
-	public Map<String, String> getTypeMappping()
+	public Map<String, String> getTypeMapping()
 	{
 		return typeTable;
 	}

@@ -81,7 +81,7 @@ public class MigrationGeneratorConfiguration
 
 		return PlatformFactory.INSTANCE.createPlatform(
 			databaseProductName,
-			metadataAdapter.getTypeMappping()
+			metadataAdapter.getTypeMapping()
 		);
 	}
 

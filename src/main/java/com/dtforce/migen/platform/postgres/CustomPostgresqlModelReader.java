@@ -38,10 +38,10 @@ public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 
 	private static final String TYPE_NAME = "TYPE_NAME";
 
-	private Map<String, String> typeTable;
+	private final Map<String, String> typeTable;
 
 	/**
-	 * Creates a new model reader for PostgreSql databases.
+	 * Creates a new model reader for Postgres databases.
 	 *
 	 * @param platform The platform that this model reader belongs to
 	 */
@@ -72,7 +72,7 @@ public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 	@Override
 	protected Column readColumn(
 		DatabaseMetaDataWrapper metaData,
-		@SuppressWarnings("rawtypes") Map values
+		Map values
 	) throws SQLException
 	{
 		RawTypedColumn rawTypedColumn = RawTypedColumn.fromColumn(super.readColumn(metaData, values));
@@ -84,8 +84,8 @@ public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 	@SuppressWarnings("unchecked")
 	protected void readIndex(
 		final DatabaseMetaDataWrapper metaData,
-		@SuppressWarnings("rawtypes") final Map values,
-		@SuppressWarnings("rawtypes") final Map knownIndices
+		final Map values,
+		final Map knownIndices
 	) throws SQLException
 	{
 		super.readIndex(metaData, values, knownIndices);

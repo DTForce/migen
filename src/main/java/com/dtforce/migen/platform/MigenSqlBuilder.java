@@ -29,7 +29,7 @@ import java.util.List;
 public interface MigenSqlBuilder extends Cloneable
 {
 	MigenSqlBuilder clone();
-	boolean writeSqlColumnType(Column column);
+	void writeSqlColumnType(Column column);
 	void writeSqlPatch(Database currentModel, Database desiredModel, List<ModelChange> changes);
 	void setWriter(Writer ex);
 }

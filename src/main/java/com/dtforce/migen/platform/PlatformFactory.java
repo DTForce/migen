@@ -18,7 +18,7 @@ package com.dtforce.migen.platform;
 
 import lombok.extern.slf4j.Slf4j;
 
-import com.dtforce.migen.platform.postgres.CustomPostgreSqlPlatform;
+import com.dtforce.migen.platform.postgres.CustomPostgresqlPlatform;
 
 import java.util.Map;
 
@@ -33,10 +33,10 @@ public class PlatformFactory
 
 		final MigenPlatform platform;
 		if (databaseProductName.toLowerCase().startsWith("postgres")) {
-			platform = new CustomPostgreSqlPlatform(platformTypeMapping);
-		} else if (databaseProductName.toLowerCase().equals("h2")) {
-			log.warn("Using PostgreSQL platform for H2");
-			platform = new CustomPostgreSqlPlatform(platformTypeMapping);
+			platform = new CustomPostgresqlPlatform(platformTypeMapping);
+		} else if (databaseProductName.equalsIgnoreCase("h2")) {
+			log.warn("Using Postgres platform for H2");
+			platform = new CustomPostgresqlPlatform(platformTypeMapping);
 		} else {
 			log.error("Unknown platform {}.", databaseProductName);
 			throw new RuntimeException("Unknown platform: " + databaseProductName);

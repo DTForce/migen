@@ -16,6 +16,8 @@
 
 package com.dtforce.migen.ddl;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.ddlutils.model.Column;
 
 import java.util.Arrays;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@Getter
+@Setter
 public class RawTypedColumn extends Column
 {
 
@@ -31,26 +35,6 @@ public class RawTypedColumn extends Column
 	private String rawType;
 
 	private String rawCompleteType;
-
-	public String getRawType()
-	{
-		return rawType;
-	}
-
-	public void setRawType(String rawType)
-	{
-		this.rawType = rawType;
-	}
-
-	public String getRawCompleteType()
-	{
-		return rawCompleteType;
-	}
-
-	public void setRawCompleteType(String rawCompleteType)
-	{
-		this.rawCompleteType = rawCompleteType;
-	}
 
 	/**
 	 * Create from original column.

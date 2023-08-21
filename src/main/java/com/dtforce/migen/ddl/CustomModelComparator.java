@@ -32,13 +32,13 @@ import java.util.Objects;
 public class CustomModelComparator extends ModelComparator
 {
 
-	private boolean caseSensitive;
+	private final boolean caseSensitive;
 
 	/**
 	 * Creates a new model comparator object.
 	 *
 	 * @param platformInfo  The platform info
-	 * @param caseSensitive Whether comparison is case sensitive
+	 * @param caseSensitive Whether comparison is case-sensitive
 	 */
 	public CustomModelComparator(PlatformInfo platformInfo, boolean caseSensitive)
 	{

@@ -28,6 +28,7 @@ import java.util.function.Predicate;
  */
 public interface MigenPlatform {
 	MigenSqlBuilder getSqlBuilder();
+
 	Database readModelFromDatabase(Connection connection, String name);
 
 	Database readModelFromDatabase(Connection connection, String name, String schemaPattern);

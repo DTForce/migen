@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.dtforce.migen.adapter.hibernate;
+package com.dtforce.migen.adapter.hibernate.integration;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.spi.BootstrapContext;
@@ -30,7 +30,7 @@ public class HibernateInfoIntegrator implements Integrator
     	HibernateInfoHolder hibernateInfoHolder = HibernateInfoHolder.INSTANCE;
 		hibernateInfoHolder.setMetadata(metadata);
 		hibernateInfoHolder.setSessionFactory(sessionFactory);
-		hibernateInfoHolder.setServiceRegistry(sessionFactory.getServiceRegistry());
+		hibernateInfoHolder.setBootstrapContext(bootstrapContext);
     }
 
     @Override

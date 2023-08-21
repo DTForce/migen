@@ -6,7 +6,7 @@ CREATE TABLE "contract"
 (
   id uuid not null primary key,
   "name" VARCHAR(255),
-  "total" NUMERIC(19,2),
+  "total" NUMERIC(38,2),
   "note" TEXT,
   "type_name" VARCHAR(255)
 );
@@ -17,7 +17,7 @@ CREATE TABLE "contract_property"
   "contract_id" uuid NOT NULL,
   "bool_val" BOOLEAN,
   "date_val" TIMESTAMP,
-  "nbr_val" NUMERIC(19,2),
+  "nbr_val" NUMERIC(38,2),
   "str_val" VARCHAR(255),
   "id_index_str" VARCHAR(255) NOT NULL,
   "property_name" VARCHAR(255) NOT NULL,

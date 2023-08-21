@@ -33,11 +33,15 @@ import org.hibernate.mapping.Index;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.UniqueKey;
 import org.hibernate.tool.schema.spi.SchemaFilter;
+import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 import org.hibernate.type.descriptor.sql.spi.DdlTypeRegistry;
 
+import com.dtforce.migen.StringUtils;
 import com.dtforce.migen.adapter.MetadataAdapter;
+import com.dtforce.migen.adapter.hibernate.integration.HibernateInfoHolder;
 import com.dtforce.migen.ddl.RawTypedColumn;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -187,20 +191,6 @@ public class HibernateAdapter implements MetadataAdapter
 		);
 	}
 
-	private Dialect getDialect()
-	{
-		return hibernateInfoHolder.getServiceRegistry()
-			.getService(JdbcServices.class)
-			.getDialect();
-	}
-
-	private DdlTypeRegistry getTypeRegistry()
-	{
-		return hibernateInfoHolder.getSessionFactory()
-			.getTypeConfiguration()
-			.getDdlTypeRegistry();
-	}
-
 	private org.apache.ddlutils.model.Index convertForeignKeyIndex(
 		final org.apache.ddlutils.model.ForeignKey foreignKey
 	) {
@@ -230,25 +220,40 @@ public class HibernateAdapter implements MetadataAdapter
 			columnResult.setRequired(true);
 		}
 
-		columnResult.setTypeCode(
-			column.getSqlTypeCode(
-				hibernateInfoHolder.getMetadata()
-			)
-		);
-		String typeTemplate = getTypeRegistry().getTypeName(columnResult.getTypeCode(), getDialect());
+		final var jdbcTypeRegistry = getJdbcTypeRegistry();
 
-		String sqlType = column.getSqlType(hibernateInfoHolder.getMetadata());
-		if (!sqlType.equals(defaultSqlType(hibernateInfoHolder.getMetadata(), column))) {
-			columnResult.setRawCompleteType(cutToParent(sqlType).toUpperCase());
+		final var metadata = hibernateInfoHolder.getMetadata();
+
+
+		final var jdbcType = jdbcTypeRegistry.findDescriptor(column.getSqlTypeCode(metadata));
+		if (jdbcType == null) {
+			columnResult.setTypeCode(Types.OTHER);
+			columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
+		} else {
+			columnResult.setTypeCode(jdbcType.getJdbcTypeCode());
+
+			String sqlType = defaultSqlType(metadata, column);
+			if (!sqlType.equals(column.getSqlType(metadata))) {
+				columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
+			}
+			columnResult.setRawType(StringUtils.cutToParent(sqlType.toUpperCase()));
 		}
-		if (typeTemplate.contains("$l")) {
-			columnResult.setSizeAndScale(column.getLength().intValue(), 0);
-		} else if (typeTemplate.contains("$p") || typeTemplate.contains("$s")){
-			columnResult.setSizeAndScale(column.getPrecision(), column.getScale());
+
+		var size = column.getColumnSize(getDialect(), metadata);
+
+		if (size.getPrecision() == null && size.getLength() != null) {
+			columnResult.setSizeAndScale(size.getLength().intValue(), 0);
+		} else if (size.getPrecision() != null) {
+			columnResult.setSizeAndScale(size.getPrecision(), size.getScale());
 		}
-		typeTemplate = cutToParent(typeTemplate);
-		columnResult.setRawType(typeTemplate.toUpperCase());
 		return columnResult;
+	}
+
+	private JdbcTypeRegistry getJdbcTypeRegistry()
+	{
+		return hibernateInfoHolder.getBootstrapContext()
+			.getTypeConfiguration()
+			.getJdbcTypeRegistry();
 	}
 
 	private String defaultSqlType(Metadata metadata, Column column)
@@ -261,13 +266,19 @@ public class HibernateAdapter implements MetadataAdapter
 		);
 	}
 
-	private String cutToParent(String str)
+	private Dialect getDialect()
 	{
-		int parentStart = str.indexOf("(");
-		if (parentStart >= 0) {
-			str = str.substring(0, parentStart);
-		}
-		return str;
+		return hibernateInfoHolder.getSessionFactory()
+			.getServiceRegistry()
+			.getService(JdbcServices.class)
+			.getDialect();
+	}
+
+	private DdlTypeRegistry getTypeRegistry()
+	{
+		return hibernateInfoHolder.getSessionFactory()
+			.getTypeConfiguration()
+			.getDdlTypeRegistry();
 	}
 
 	private Metadata metadata()

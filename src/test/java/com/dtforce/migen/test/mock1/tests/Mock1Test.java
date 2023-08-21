@@ -115,7 +115,7 @@ public class Mock1Test
 
 		assertColumnType(tableColumns.get("id"), "UUID");
 		assertColumnType(tableColumns.get("name"), "VARCHAR(255)");
-		assertColumnType(tableColumns.get("total"), "NUMERIC(19,2)");
+		assertColumnType(tableColumns.get("total"), "NUMERIC(38,2)");
 		assertColumnType(tableColumns.get("note"), "TEXT");
 		assertColumnType(tableColumns.get("type_name"), "VARCHAR(255)");
 	}
@@ -144,8 +144,8 @@ public class Mock1Test
 
 		assertColumnType(tableColumns.get("id_index_str"), "VARCHAR(255)");
 		assertColumnType(tableColumns.get("bool_val"), "BOOLEAN");
-		assertColumnType(tableColumns.get("date_val"), "TIMESTAMP");
-		assertColumnType(tableColumns.get("nbr_val"), "NUMERIC(19,2)");
+		assertColumnType(tableColumns.get("date_val"), "TIMESTAMP(6)");
+		assertColumnType(tableColumns.get("nbr_val"), "NUMERIC(38,2)");
 		assertColumnType(tableColumns.get("str_val"), "VARCHAR(255)");
 		assertColumnType(tableColumns.get("contract_id"), "UUID");
 		assertColumnType(tableColumns.get("property_name"), "VARCHAR(255)");

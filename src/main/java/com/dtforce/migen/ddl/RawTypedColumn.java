@@ -20,10 +20,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.ddlutils.model.Column;
 
+import com.dtforce.migen.StringUtils;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -88,8 +89,7 @@ public class RawTypedColumn extends Column
 		if (rawCompleteType == null) {
 			return rawType;
 		}
-		String[] parts = rawCompleteType.split(Pattern.quote(" "));
-		return parts[0];
+		return StringUtils.cutToParent(rawCompleteType);
 	}
 
 	boolean hasSize()

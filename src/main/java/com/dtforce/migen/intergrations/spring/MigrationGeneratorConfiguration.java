@@ -26,7 +26,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import com.dtforce.migen.MigrationGenerator;
 import com.dtforce.migen.adapter.MetadataAdapter;
 import com.dtforce.migen.adapter.hibernate.HibernateAdapter;
-import com.dtforce.migen.adapter.hibernate.HibernateInfoHolder;
+import com.dtforce.migen.adapter.hibernate.integration.HibernateInfoHolder;
 import com.dtforce.migen.platform.MigenPlatform;
 import com.dtforce.migen.platform.PlatformFactory;
 

@@ -14,16 +14,17 @@
  *    limitations under the License.
  */
 
-package com.dtforce.migen.adapter.hibernate;
+package com.dtforce.migen.adapter.hibernate.integration;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.service.spi.ServiceRegistryImplementor;
 
 @Getter
-@Setter
+@Setter(AccessLevel.PACKAGE)
 public class HibernateInfoHolder
 {
 
@@ -33,7 +34,7 @@ public class HibernateInfoHolder
 
 	private SessionFactoryImplementor sessionFactory;
 
-	private ServiceRegistryImplementor serviceRegistry;
+	private BootstrapContext bootstrapContext;
 
 	private HibernateInfoHolder()
 	{

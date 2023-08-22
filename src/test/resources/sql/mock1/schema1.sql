@@ -19,6 +19,7 @@ CREATE TABLE "contract_property"
   "date_val" TIMESTAMP,
   "nbr_val" NUMERIC(38,2),
   "str_val" VARCHAR(255),
+  "instant_val" TIMESTAMPTZ,
   "id_index_str" VARCHAR(255) NOT NULL,
   "property_name" VARCHAR(255) NOT NULL,
   "type_name" VARCHAR(255) NOT NULL,

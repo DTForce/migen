@@ -16,17 +16,18 @@
 
 package com.dtforce.migen.test.mock1.entities;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 
 @Getter
 @Setter
@@ -62,5 +63,8 @@ public class ContractProperty
 
 	@Column
 	private Date dateVal;
+
+	@Column
+	private Instant instantVal;
 
 }

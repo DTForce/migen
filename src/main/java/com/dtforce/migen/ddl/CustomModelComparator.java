@@ -66,7 +66,7 @@ public class CustomModelComparator extends ModelComparator
 				changes.add(new ColumnRawTypeChanged(
 						targetTable,
 						(RawTypedColumn) targetColumn,
-						((RawTypedColumn) sourceColumn).getRawType()
+						((RawTypedColumn) sourceColumn).getRawCompleteType()
 				));
 			}
 		}

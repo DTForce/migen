@@ -19,17 +19,21 @@ package com.dtforce.migen.platform.postgres;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
 import org.apache.ddlutils.model.Index;
+import org.apache.ddlutils.model.Table;
 import org.apache.ddlutils.platform.DatabaseMetaDataWrapper;
 import org.apache.ddlutils.platform.MetaDataColumnDescriptor;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlModelReader;
 
 import com.dtforce.migen.ddl.FilterIndexDef;
 import com.dtforce.migen.ddl.RawTypedColumn;
+import com.dtforce.migen.platform.PlatformTypeMapping;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 {
@@ -38,17 +42,20 @@ public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 
 	private static final String TYPE_NAME = "TYPE_NAME";
 
-	private final Map<String, String> typeTable;
+	private final PlatformTypeMapping typeProcessors;
 
 	/**
 	 * Creates a new model reader for Postgres databases.
 	 *
 	 * @param platform The platform that this model reader belongs to
 	 */
-	public CustomPostgresqlModelReader(Platform platform, Map<String, String> typeTable)
+	public CustomPostgresqlModelReader(
+		Platform platform,
+		PlatformTypeMapping typeTable
+	)
 	{
 		super(platform);
-		this.typeTable = typeTable;
+		this.typeProcessors = typeTable;
 	}
 
 	@Override
@@ -76,8 +83,7 @@ public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 	) throws SQLException
 	{
 		RawTypedColumn rawTypedColumn = RawTypedColumn.fromColumn(super.readColumn(metaData, values));
-		rawTypedColumn.setRawType(convertDBType(values));
-		return rawTypedColumn;
+		return convertDBType(values, rawTypedColumn);
 	}
 
 	@Override
@@ -98,13 +104,49 @@ public class CustomPostgresqlModelReader extends PostgreSqlModelReader
 		}
 	}
 
-	private String convertDBType(@SuppressWarnings("rawtypes") Map values)
+	@Override
+	protected void removeInternalPrimaryKeyIndex(DatabaseMetaDataWrapper metaData, Table table) throws SQLException {
+		Column[] pks = table.getPrimaryKeyColumns();
+		Set<String> columnNames = new HashSet<>();
+
+		int indexIdx;
+		for(indexIdx = 0; indexIdx < pks.length; ++indexIdx) {
+			columnNames.add(pks[indexIdx].getName());
+		}
+
+		indexIdx = 0;
+
+		while(indexIdx < table.getIndexCount()) {
+			Index index = table.getIndex(indexIdx);
+			if (
+				index.isUnique() &&
+					this.matchesIgnoreOrder(index, columnNames) &&
+					this.isInternalPrimaryKeyIndex(metaData, table, index)
+			) {
+				table.removeIndex(indexIdx);
+			} else {
+				++indexIdx;
+			}
+		}
+	}
+
+	protected boolean matchesIgnoreOrder(Index index, Set<String> columnsToSearchFor) {
+		if (index.getColumnCount() != columnsToSearchFor.size()) {
+			return false;
+		} else {
+			Set<String> columnNamesIdx = new HashSet<>();
+			for(int columnIdx = 0; columnIdx < index.getColumnCount(); ++columnIdx) {
+				columnNamesIdx.add(index.getColumn(columnIdx).getName());
+			}
+
+			return columnNamesIdx.equals(columnsToSearchFor);
+		}
+	}
+
+	private RawTypedColumn convertDBType(@SuppressWarnings("rawtypes") Map values, RawTypedColumn rawTypedColumn)
 	{
 		String dbType = ((String) values.get(TYPE_NAME)).toUpperCase();
-		if (typeTable.containsKey(dbType)) {
-			return typeTable.get(dbType);
-		}
-		return dbType;
+		return typeProcessors.map(dbType, rawTypedColumn);
 	}
 
 }

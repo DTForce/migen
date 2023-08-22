@@ -37,7 +37,10 @@ public class Client
 	@ElementCollection
 	private Set<String> authorities;
 
-	@Column(name = "path", nullable = false, columnDefinition = "ltree")
+	@Column(name = "path", nullable = false, unique = true, columnDefinition = "ltree")
 	@Type(value = OtherStringType.class)
 	private String path;
+
+	@Column(name = "description", columnDefinition = "text")
+	private String description;
 }

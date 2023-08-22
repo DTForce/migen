@@ -34,6 +34,7 @@ import org.apache.ddlutils.model.Index;
 import org.apache.ddlutils.model.IndexColumn;
 import org.apache.ddlutils.model.ModelException;
 import org.apache.ddlutils.model.Table;
+import org.apache.ddlutils.model.UniqueIndex;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlBuilder;
 
@@ -126,6 +127,17 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 					params == null ? null : params.getParametersFor(targetTable),
 					entry.getValue()
 			);
+		}
+	}
+
+	public void writeExternalIndexDropStmt(Table table, Index index) throws IOException {
+		if (index instanceof UniqueIndex uniqueIndex) {
+			this.writeTableAlterStmt(table);
+			this.print("DROP CONSTRAINT ");
+			this.printIdentifier(this.getIndexName(uniqueIndex));
+			this.printEndOfStatement();
+		} else {
+			super.writeExternalIndexDropStmt(table, index);
 		}
 	}
 

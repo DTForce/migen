@@ -120,6 +120,7 @@ public class Mock2Test
 
 		assertThat(new ArrayList<>(tableColumns.keySet())).containsExactly(
 			"id",
+			"description",
 			"path"
 		);
 

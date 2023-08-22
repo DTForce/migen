@@ -20,14 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.dtforce.migen.platform.postgres.CustomPostgresqlPlatform;
 
-import java.util.Map;
-
 @Slf4j
 public class PlatformFactory
 {
 	public final static PlatformFactory INSTANCE = new PlatformFactory();
 
-	public MigenPlatform createPlatform(String databaseProductName, Map<String, String> platformTypeMapping)
+	public MigenPlatform createPlatform(String databaseProductName, PlatformTypeMapping platformTypeMapping)
 	{
 		// TODO support more platforms
 

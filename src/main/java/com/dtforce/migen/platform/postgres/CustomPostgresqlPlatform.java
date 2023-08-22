@@ -16,6 +16,7 @@
 
 package com.dtforce.migen.platform.postgres;
 
+import com.google.common.base.MoreObjects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.ddlutils.alteration.ModelChange;
@@ -26,10 +27,10 @@ import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
 import com.dtforce.migen.ddl.CustomModelComparator;
 import com.dtforce.migen.platform.MigenPlatform;
 import com.dtforce.migen.platform.MigenSqlBuilder;
+import com.dtforce.migen.platform.PlatformTypeMapping;
 
 import java.sql.Connection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -39,9 +40,75 @@ public class CustomPostgresqlPlatform implements MigenPlatform
 	@Getter(AccessLevel.PACKAGE)
 	private final PlatformImplBase wrappedPlatform;
 
-	public CustomPostgresqlPlatform(Map<String, String> platformTypeMapping)
+	public static final PlatformTypeMapping DEFAULT_TYPE_MAPPING;
+
+	static {
+		DEFAULT_TYPE_MAPPING = new PlatformTypeMapping()
+			.withGeneralProcessor((dbType, rawTypedColumn) -> {
+				if (dbType.startsWith("_")) {
+					rawTypedColumn.setRawCompleteType(dbType.substring(1) + "[]");
+				}
+				return rawTypedColumn;
+			})
+			.withMapping("BOOL", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType("BOOLEAN");
+				return rawTypedColumn;
+			})
+			.withMapping("VARCHAR", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType(
+					String.format("VARCHAR(%d)", rawTypedColumn.getSizeAsInt())
+				);
+				return rawTypedColumn;
+			})
+			.withMapping("NUMERIC", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType(
+					String.format(
+						"NUMERIC(%d,%d)",
+						rawTypedColumn.getPrecisionRadix(),
+						rawTypedColumn.getScale()
+					)
+				);
+				return rawTypedColumn;
+			})
+			.withMapping("TIMESTAMP", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType(
+					String.format(
+						"TIMESTAMP(%d)",
+						rawTypedColumn.getScale()
+					)
+				);
+				return rawTypedColumn;
+			})
+			.withMapping("TIMESTAMPTZ", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType(
+					String.format(
+						"TIMESTAMP(%d) WITH TIME ZONE",
+						rawTypedColumn.getScale()
+					)
+				);
+				return rawTypedColumn;
+			})
+			.withMapping("INT8", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType("BIGINT");
+				return rawTypedColumn;
+			})
+			.withMapping("INT4", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType("INTEGER");
+				return rawTypedColumn;
+			})
+			.withMapping("INT2", rawTypedColumn -> {
+				rawTypedColumn.setRawCompleteType("SMALLINT");
+				return rawTypedColumn;
+			});
+	}
+
+
+	public CustomPostgresqlPlatform(PlatformTypeMapping platformTypeMapping)
 	{
-		wrappedPlatform = new DdlUtilsWrapper(platformTypeMapping, this);
+		wrappedPlatform = new DdlUtilsWrapper(
+			MoreObjects.firstNonNull(platformTypeMapping, DEFAULT_TYPE_MAPPING),
+			this
+		);
 	}
 
 	@Override
@@ -76,11 +143,12 @@ public class CustomPostgresqlPlatform implements MigenPlatform
 	private static class DdlUtilsWrapper extends PostgreSqlPlatform
 	{
 
-		private DdlUtilsWrapper(Map<String, String> platformTypeMapping, CustomPostgresqlPlatform platform)
+		private DdlUtilsWrapper(PlatformTypeMapping platformTypeMapping, CustomPostgresqlPlatform platform)
 		{
 			super();
 			setModelReader(new CustomPostgresqlModelReader(this, platformTypeMapping));
 			getPlatformInfo().setMaxIdentifierLength(63);
+			getPlatformInfo().addNativeTypeMapping(2003, "BYTEA", 2003);
 
 			CustomPostgresqlBuilder builder = new CustomPostgresqlBuilder(platform);
 			setSqlBuilder(builder);

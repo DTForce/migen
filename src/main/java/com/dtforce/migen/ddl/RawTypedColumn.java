@@ -20,8 +20,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.ddlutils.model.Column;
 
-import com.dtforce.migen.StringUtils;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -32,8 +30,6 @@ public class RawTypedColumn extends Column
 {
 
 	private static final List<Integer> typeCodesWithSize = Arrays.asList(3, 12, -3, 2, 1111);
-
-	private String rawType;
 
 	private String rawCompleteType;
 
@@ -73,23 +69,18 @@ public class RawTypedColumn extends Column
 			return false;
 		}
 		final RawTypedColumn that = (RawTypedColumn) o;
-		return Objects.equals(getRawType(), that.getRawType()) || Objects.equals(getRawCompleteType(),
-			that.getRawCompleteType()
-		);
+		return Objects.equals(getRawCompleteType(), that.getRawCompleteType());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(super.hashCode(), getRawType(), getRawCompleteType());
+		return Objects.hash(super.hashCode(), getRawCompleteType());
 	}
 
 	public String getTypeToCompare()
 	{
-		if (rawCompleteType == null) {
-			return rawType;
-		}
-		return StringUtils.cutToParent(rawCompleteType);
+		return rawCompleteType;
 	}
 
 	boolean hasSize()

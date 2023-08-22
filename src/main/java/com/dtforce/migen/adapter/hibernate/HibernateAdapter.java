@@ -36,15 +36,12 @@ import org.hibernate.tool.schema.spi.SchemaFilter;
 import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 import org.hibernate.type.descriptor.sql.spi.DdlTypeRegistry;
 
-import com.dtforce.migen.StringUtils;
 import com.dtforce.migen.adapter.MetadataAdapter;
 import com.dtforce.migen.adapter.hibernate.integration.HibernateInfoHolder;
 import com.dtforce.migen.ddl.RawTypedColumn;
 
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 @Slf4j
 public class HibernateAdapter implements MetadataAdapter
@@ -52,13 +49,6 @@ public class HibernateAdapter implements MetadataAdapter
 	private final HibernateInfoHolder hibernateInfoHolder;
 
 	private final SchemaFilter schemaFilter;
-
-	private static final HashMap<String, String> typeTable;
-
-	static {
-		typeTable = new HashMap<>();
-		typeTable.put("BOOL", "BOOLEAN");
-	}
 
 	public HibernateAdapter(
 		final HibernateInfoHolder hibernateInfoHolder,
@@ -80,12 +70,6 @@ public class HibernateAdapter implements MetadataAdapter
 			}
 		}
 		return database;
-	}
-
-	@Override
-	public Map<String, String> getTypeMapping()
-	{
-		return typeTable;
 	}
 
 	private void createTables(final Namespace namespace, final Database database)
@@ -112,7 +96,8 @@ public class HibernateAdapter implements MetadataAdapter
 			if (column.isUnique()) {
 				UniqueIndex index = new UniqueIndex();
 				index.addColumn(new IndexColumn(convertColumn));
-				index.setName("idx_" + column.getName());
+				index.setName(table.getName() + "_" + column.getName() + "_unq");
+				tableResult.addIndex(index);
 			}
 		}
 
@@ -231,12 +216,7 @@ public class HibernateAdapter implements MetadataAdapter
 			columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
 		} else {
 			columnResult.setTypeCode(jdbcType.getJdbcTypeCode());
-
-			String sqlType = defaultSqlType(metadata, column);
-			if (!sqlType.equals(column.getSqlType(metadata))) {
-				columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
-			}
-			columnResult.setRawType(StringUtils.cutToParent(sqlType.toUpperCase()));
+			columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
 		}
 
 		var size = column.getColumnSize(getDialect(), metadata);

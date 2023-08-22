@@ -135,6 +135,7 @@ public class Mock1Test
 			"id_index_str",
 			"bool_val",
 			"date_val",
+			"instant_val",
 			"nbr_val",
 			"str_val",
 			"contract_id",

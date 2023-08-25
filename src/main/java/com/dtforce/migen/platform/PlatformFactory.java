@@ -19,6 +19,7 @@ package com.dtforce.migen.platform;
 import lombok.extern.slf4j.Slf4j;
 
 import com.dtforce.migen.platform.postgres.CustomPostgresqlPlatform;
+import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 @Slf4j
 public class PlatformFactory

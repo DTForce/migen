@@ -26,7 +26,7 @@ import org.apache.ddlutils.platform.postgresql.PostgreSqlModelReader;
 
 import com.dtforce.migen.ddl.FilterIndexDef;
 import com.dtforce.migen.ddl.RawTypedColumn;
-import com.dtforce.migen.platform.PlatformTypeMapping;
+import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 import java.sql.SQLException;
 import java.sql.Types;

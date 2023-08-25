@@ -27,7 +27,7 @@ import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
 import com.dtforce.migen.ddl.CustomModelComparator;
 import com.dtforce.migen.platform.MigenPlatform;
 import com.dtforce.migen.platform.MigenSqlBuilder;
-import com.dtforce.migen.platform.PlatformTypeMapping;
+import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 import java.sql.Connection;
 import java.util.List;
@@ -44,11 +44,14 @@ public class CustomPostgresqlPlatform implements MigenPlatform
 
 	static {
 		DEFAULT_TYPE_MAPPING = new PlatformTypeMapping()
-			.withGeneralProcessor((dbType, rawTypedColumn) -> {
+			.withGeneralProcessor((dbType, chain, rawTypedColumn) -> {
 				if (dbType.startsWith("_")) {
-					rawTypedColumn.setRawCompleteType(dbType.substring(1) + "[]");
+					final var typedColumn = chain.map(dbType.substring(1), rawTypedColumn);
+					typedColumn.setRawCompleteType(typedColumn.getRawCompleteType() + "[]");
+					return typedColumn;
+				} else {
+					return chain.map(dbType, rawTypedColumn);
 				}
-				return rawTypedColumn;
 			})
 			.withMapping("BOOL", rawTypedColumn -> {
 				rawTypedColumn.setRawCompleteType("BOOLEAN");

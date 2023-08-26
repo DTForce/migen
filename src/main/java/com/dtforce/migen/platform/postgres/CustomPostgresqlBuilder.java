@@ -130,6 +130,25 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void writeExternalPrimaryKeysCreateStmt(Table table, Column[] primaryKeyColumns) throws IOException
+	{
+		// TODO store name of the primary key in ddlutils
+		if ((primaryKeyColumns.length > 0) && shouldGeneratePrimaryKeys(primaryKeyColumns))
+		{
+			print("ALTER TABLE ");
+			printlnIdentifier(getTableName(table));
+			printIndent();
+			print("ADD CONSTRAINT ");
+			printIdentifier(getConstraintName(null, table, "pkey", null));
+			print(" ");
+			writePrimaryKeyStmt(table, primaryKeyColumns);
+			printEndOfStatement();
+		}
+	}
+
 	public void writeExternalIndexDropStmt(Table table, Index index) throws IOException {
 		if (index instanceof UniqueIndex uniqueIndex) {
 			this.writeTableAlterStmt(table);

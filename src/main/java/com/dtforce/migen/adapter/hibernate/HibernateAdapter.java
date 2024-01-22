@@ -34,7 +34,6 @@ import org.hibernate.mapping.Table;
 import org.hibernate.mapping.UniqueKey;
 import org.hibernate.tool.schema.spi.SchemaFilter;
 import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
-import org.hibernate.type.descriptor.sql.spi.DdlTypeRegistry;
 
 import com.dtforce.migen.adapter.MetadataAdapter;
 import com.dtforce.migen.adapter.hibernate.integration.HibernateInfoHolder;
@@ -224,7 +223,11 @@ public class HibernateAdapter implements MetadataAdapter
 		if (size.getPrecision() == null && size.getLength() != null) {
 			columnResult.setSizeAndScale(size.getLength().intValue(), 0);
 		} else if (size.getPrecision() != null) {
-			columnResult.setSizeAndScale(size.getPrecision(), size.getScale());
+			if (size.getScale() == null) {
+				columnResult.setSizeAndScale(size.getPrecision(), 0);
+			} else {
+				columnResult.setSizeAndScale(size.getPrecision(), size.getScale());
+			}
 		}
 		return columnResult;
 	}
@@ -236,16 +239,6 @@ public class HibernateAdapter implements MetadataAdapter
 			.getJdbcTypeRegistry();
 	}
 
-	private String defaultSqlType(Metadata metadata, Column column)
-	{
-		return getTypeRegistry().getTypeName(
-			column.getSqlTypeCode(metadata),
-			column.getLength(),
-			column.getPrecision(),
-			column.getScale()
-		);
-	}
-
 	private Dialect getDialect()
 	{
 		return hibernateInfoHolder.getSessionFactory()
@@ -254,12 +247,6 @@ public class HibernateAdapter implements MetadataAdapter
 			.getDialect();
 	}
 
-	private DdlTypeRegistry getTypeRegistry()
-	{
-		return hibernateInfoHolder.getSessionFactory()
-			.getTypeConfiguration()
-			.getDdlTypeRegistry();
-	}
 
 	private Metadata metadata()
 	{

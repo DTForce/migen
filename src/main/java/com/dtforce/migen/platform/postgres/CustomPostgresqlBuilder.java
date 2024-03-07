@@ -38,6 +38,7 @@ import org.apache.ddlutils.model.UniqueIndex;
 import org.apache.ddlutils.platform.CreationParameters;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlBuilder;
 
+import com.dtforce.migen.ddl.ColumnDescriptionChanged;
 import com.dtforce.migen.ddl.FilterIndexDef;
 import com.dtforce.migen.ddl.RawTypedColumn;
 import com.dtforce.migen.platform.MigenSqlBuilder;
@@ -184,6 +185,8 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 				processTypeChange(currentModel, desiredModel, (ColumnSizeChange) change);
 			} else if (change instanceof ColumnRequiredChange) {
 				processChange(currentModel, desiredModel, (ColumnRequiredChange) change);
+			} else if (change instanceof ColumnDescriptionChanged) {
+				processCommentChange(currentModel, desiredModel, (ColumnDescriptionChanged) change);
 			} else if (change instanceof final AddColumnChange addColumnChange) {
 				if (addColumnChange.getNewColumn().isRequired() &&
 					!addColumnChange.getNewColumn().isAutoIncrement() &&
@@ -221,6 +224,21 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 		}
 
 		super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
+	}
+
+	private void processCommentChange(Database currentModel, Database desiredModel, ColumnDescriptionChanged change)
+			throws IOException
+	{
+		Column desiredColumn = findDesiredColumn(desiredModel, change);
+		this.print("COMMENT ON COLUMN ");
+		this.printlnIdentifier(this.getTableName(change.getChangedTable()) + "." + this.getColumnName(change.getChangedColumn()));
+		this.printIndent();
+		this.print("IS '");
+		this.print(change.
+		this.print(" TYPE ");
+		this.print(this.getSqlType(desiredColumn));
+		this.printEndOfStatement();
+		change.apply(currentModel, isCaseSensitive());
 	}
 
 	@Override

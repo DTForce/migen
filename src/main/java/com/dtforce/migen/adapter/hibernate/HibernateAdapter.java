@@ -195,6 +195,7 @@ public class HibernateAdapter implements MetadataAdapter
 		columnResult.setName(column.getName());
 		columnResult.setAutoIncrement(false);
 		columnResult.setPrimaryKey(false);
+		columnResult.setDescription(column.getComment());
 		if (table.getPrimaryKey() != null) {
 			columnResult.setPrimaryKey(table.getPrimaryKey().containsColumn(column));
 		}

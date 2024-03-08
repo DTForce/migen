@@ -84,6 +84,7 @@ public class HibernateAdapter implements MetadataAdapter
 	{
 		org.apache.ddlutils.model.Table tableResult = new org.apache.ddlutils.model.Table();
 		tableResult.setName(table.getName());
+		tableResult.setDescription(table.getComment());
 
 		if (table.getPrimaryKey() == null) {
 			log.warn("Table {} does not have a primary key.", table.getName());
@@ -129,8 +130,8 @@ public class HibernateAdapter implements MetadataAdapter
 		final NonUniqueIndex nonUniqueIndex = new NonUniqueIndex();
 		nonUniqueIndex.setName(index.getName());
 
-		for (var column : index.getColumns()) {
-			nonUniqueIndex.addColumn(new IndexColumn(tableResult.findColumn(column.getName())));
+		for (var entry : index.getSelectableOrderMap().entrySet()) {
+			nonUniqueIndex.addColumn(new IndexColumn(tableResult.findColumn(entry.getKey().getText())));
 		}
 		tableResult.addIndex(nonUniqueIndex);
 	}

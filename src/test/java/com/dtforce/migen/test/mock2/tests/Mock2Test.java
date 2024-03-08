@@ -128,6 +128,13 @@ public class Mock2Test
 		assertColumnType(tableColumns.get("path"), "LTREE");
 	}
 
+	@Test
+	public void testComment() {
+		String sql = migrationGenerator.generateMigrationSQL();
+		assertThat(sql).contains("COMMENT ON COLUMN \"client.description\"\n    IS 'This is a description of the field description.';");
+		assertThat(sql).contains("COMMENT ON TABLE \"client\"\n    IS 'This is a description of the table client.';");
+	}
+
 	private void assertColumnType(Column column, String type)
 	{
 		stringWriter.getBuffer().setLength(0);

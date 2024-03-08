@@ -71,6 +71,10 @@ public class CustomModelComparator extends ModelComparator
 			}
 		}
 
+		if (!isSameComment(sourceColumn, targetColumn)) {
+			changes.add(new ColumnDescriptionChanged(targetTable, targetColumn, sourceColumn.getDescription()));
+		}
+
 		return changes;
 	}
 
@@ -79,7 +83,7 @@ public class CustomModelComparator extends ModelComparator
 		final Database sourceModel, final Table sourceTable, final Database targetModel, final Table targetTable
 	)
 	{
-		final List<?> changes = super.compareTables(sourceModel, sourceTable, targetModel, targetTable);
+		final List changes = super.compareTables(sourceModel, sourceTable, targetModel, targetTable);
 		// remove primary key changes based on reordering columns
 		changes.removeIf(o -> {
 			if (o instanceof PrimaryKeyChange) {
@@ -108,6 +112,9 @@ public class CustomModelComparator extends ModelComparator
 				return false;
 			}
 		});
+		if (!Objects.equals(sourceTable.getDescription(), targetTable.getDescription())) {
+			changes.add(new TableDescriptionChanged(targetTable, sourceTable.getDescription()));
+		}
 		return changes;
 	}
 
@@ -135,6 +142,14 @@ public class CustomModelComparator extends ModelComparator
 				!rawTypedColumn2.hasSize() ||
 				Objects.equals(rawTypedColumn1.getSize(), rawTypedColumn2.getSize())
 			);
+	}
+
+	private boolean isSameComment(final Column sourceColumn, final Column targetColumn)
+	{
+		return Objects.equals(
+			sourceColumn.getDescription(),
+			targetColumn.getDescription()
+		);
 	}
 
 }

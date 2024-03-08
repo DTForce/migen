@@ -25,6 +25,7 @@ import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Comment;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
@@ -35,6 +36,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Audited
+@Comment("This is a description of the table contract.")
 public class Contract
 {
 
@@ -53,6 +55,7 @@ public class Contract
 
 	@ColumnDefault("'test'")
 	@Column(columnDefinition = "TEXT")
+	@Comment("This is a description of the field note.")
 	private String note;
 
 	@Audited

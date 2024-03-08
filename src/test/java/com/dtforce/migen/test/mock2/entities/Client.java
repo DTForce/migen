@@ -21,6 +21,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
+import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.Type;
 
 import com.dtforce.migen.adapter.hibernate.type.OtherStringType;
@@ -29,6 +30,7 @@ import java.util.Set;
 
 @Entity
 @Data
+@Comment("This is a description of the table client.")
 public class Client
 {
 	@Id
@@ -42,5 +44,6 @@ public class Client
 	private String path;
 
 	@Column(name = "description", columnDefinition = "text")
+	@Comment("This is a description of the field description.")
 	private String description;
 }

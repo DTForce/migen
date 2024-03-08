@@ -41,6 +41,7 @@ import org.apache.ddlutils.platform.postgresql.PostgreSqlBuilder;
 import com.dtforce.migen.ddl.ColumnDescriptionChanged;
 import com.dtforce.migen.ddl.FilterIndexDef;
 import com.dtforce.migen.ddl.RawTypedColumn;
+import com.dtforce.migen.ddl.TableDescriptionChanged;
 import com.dtforce.migen.platform.MigenSqlBuilder;
 
 import java.io.IOException;
@@ -184,9 +185,9 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 			} else if (change instanceof ColumnSizeChange) {
 				processTypeChange(currentModel, desiredModel, (ColumnSizeChange) change);
 			} else if (change instanceof ColumnRequiredChange) {
-				processChange(currentModel, desiredModel, (ColumnRequiredChange) change);
+				processChange(currentModel, (ColumnRequiredChange) change);
 			} else if (change instanceof ColumnDescriptionChanged) {
-				processCommentChange(currentModel, desiredModel, (ColumnDescriptionChanged) change);
+				processColumnCommentChange(currentModel, (ColumnDescriptionChanged) change);
 			} else if (change instanceof final AddColumnChange addColumnChange) {
 				if (addColumnChange.getNewColumn().isRequired() &&
 					!addColumnChange.getNewColumn().isAutoIncrement() &&
@@ -224,21 +225,6 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 		}
 
 		super.processTableStructureChanges(currentModel, desiredModel, sourceTable, targetTable, parameters, changes);
-	}
-
-	private void processCommentChange(Database currentModel, Database desiredModel, ColumnDescriptionChanged change)
-			throws IOException
-	{
-		Column desiredColumn = findDesiredColumn(desiredModel, change);
-		this.print("COMMENT ON COLUMN ");
-		this.printlnIdentifier(this.getTableName(change.getChangedTable()) + "." + this.getColumnName(change.getChangedColumn()));
-		this.printIndent();
-		this.print("IS '");
-		this.print(change.
-		this.print(" TYPE ");
-		this.print(this.getSqlType(desiredColumn));
-		this.printEndOfStatement();
-		change.apply(currentModel, isCaseSensitive());
 	}
 
 	@Override
@@ -296,6 +282,26 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 			} else {
 				dropTable(sourceTable);
 				createTable(desiredModel, realTargetTable, parameters);
+			}
+		}
+	}
+
+	@Override
+	public void createTable(final Database database, final Table table, final Map parameters) throws IOException
+	{
+		super.createTable(database, table, parameters);
+
+		// add comments
+		if (table.getDescription() != null) {
+			processTableCommentChange(database, new TableDescriptionChanged(table, table.getDescription()));
+		}
+
+		for (Column column : table.getColumns()) {
+			if (column.getDescription() != null) {
+				processColumnCommentChange(
+					database,
+					new ColumnDescriptionChanged(table, column, column.getDescription())
+				);
 			}
 		}
 	}
@@ -374,11 +380,42 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 		}
 	}
 
-	private void processChange(
-			Database currentModel,
-			Database desiredModel,
-			ColumnRequiredChange change
-	) throws IOException
+	private void processColumnCommentChange(Database currentModel, ColumnDescriptionChanged change)
+		throws IOException
+	{
+		processGenericCommentChange(
+			"COLUMN",
+			this.getTableName(change.getChangedTable()) + "." + this.getColumnName(change.getChangedColumn()),
+			change.getDescription()
+		);
+		change.apply(currentModel, isCaseSensitive());
+	}
+
+	private void processTableCommentChange(Database currentModel, TableDescriptionChanged change)
+		throws IOException
+	{
+		processGenericCommentChange("TABLE", this.getTableName(change.getChangedTable()), change.getDescription());
+		change.apply(currentModel, isCaseSensitive());
+	}
+
+	private void processGenericCommentChange(String type, String ident, String description)
+		throws IOException
+	{
+		this.print("COMMENT ON " + type.toUpperCase() + " ");
+		this.printlnIdentifier(ident);
+		this.printIndent();
+		this.print("IS ");
+		if (description != null) {
+			this.print("'");
+			this.print(description);
+			this.print("'");
+		} else {
+			this.print("NULL");
+		}
+		this.printEndOfStatement();
+	}
+
+	private void processChange(Database currentModel, ColumnRequiredChange change) throws IOException
 	{
 		this.print("ALTER TABLE ");
 		this.printlnIdentifier(this.getTableName(change.getChangedTable()));

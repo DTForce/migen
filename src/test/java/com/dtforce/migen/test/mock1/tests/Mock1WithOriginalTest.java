@@ -27,12 +27,15 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.dtforce.migen.MigrationGenerator;
+import com.dtforce.migen.ddl.ColumnDescriptionChanged;
+import com.dtforce.migen.ddl.TableDescriptionChanged;
 import com.dtforce.migen.platform.MigenPlatform;
 import com.dtforce.migen.platform.MigenSqlBuilder;
 import com.dtforce.migen.test.mock1.spring.Mock1;
 
 import java.io.StringWriter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.dtforce.migen.test.TestTools.filterAddedTablesNames;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,7 +83,28 @@ public class Mock1WithOriginalTest
 			"contract_property_aud",
 			"revinfo"
 		);
-		assertThat(changes).hasSize(9);
+		assertThat(changes).hasSize(12);
+	}
+
+	@Test
+	public void testComments() {
+		List<ModelChange> changes = migrationGenerator.generateMigrationChanges();
+		final var columnComments = changes.stream()
+			.filter(it -> it instanceof ColumnDescriptionChanged)
+			.map(it -> (ColumnDescriptionChanged) it)
+			.collect(Collectors.toList());
+
+		assertThat(columnComments).hasSize(1);
+		assertThat(columnComments.get(0).getChangedColumn().getName()).isEqualTo("note");
+
+
+		final var tableComments = changes.stream()
+			.filter(it -> it instanceof TableDescriptionChanged)
+			.map(it -> (TableDescriptionChanged) it)
+			.collect(Collectors.toList());
+
+		assertThat(tableComments).hasSize(1);
+		assertThat(tableComments.get(0).getChangedTable().getName()).isEqualTo("contract");
 	}
 
 	@Test

@@ -17,18 +17,15 @@
 package com.dtforce.migen.ddl;
 
 import lombok.Getter;
-import org.apache.ddlutils.alteration.ColumnChange;
-import org.apache.ddlutils.model.Column;
+import org.apache.ddlutils.alteration.TableChange;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 
-public class ColumnDescriptionChanged implements ColumnChange
+public class TableDescriptionChanged implements TableChange
 {
 
 	@Getter
 	private final String description;
-
-	private final Column column;
 
 	private final Table table;
 
@@ -39,17 +36,10 @@ public class ColumnDescriptionChanged implements ColumnChange
 	 * @param column  The column
 	 * @param comment The JDBC type code of the new type
 	 */
-	public ColumnDescriptionChanged(Table table, Column column, String description)
+	public TableDescriptionChanged(Table table, String description)
 	{
 		this.table = table;
-		this.column = column;
 		this.description = description;
-	}
-
-	@Override
-	public Column getChangedColumn()
-	{
-		return column;
 	}
 
 	@Override
@@ -62,7 +52,6 @@ public class ColumnDescriptionChanged implements ColumnChange
 	public void apply(Database database, boolean caseSensitive)
 	{
 		database.findTable(table.getName())
-				.findColumn(column.getName())
 				.setDescription(getDescription());
 	}
 

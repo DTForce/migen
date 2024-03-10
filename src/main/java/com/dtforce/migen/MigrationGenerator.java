@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 
+/**
+ * Test
+ */
 public class MigrationGenerator
 {
 

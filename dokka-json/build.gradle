@@ -1,0 +1,38 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+buildscript {
+	ext {
+		dokkaVersion = '1.9.20'
+	}
+	repositories {
+		mavenCentral()
+	}
+}
+
+plugins {
+	id "org.jetbrains.kotlin.jvm" version "1.9.23"
+//	id("org.jetbrains.dokka") version "1.9.20"
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compileOnly("org.jetbrains.dokka:dokka-core:$dokkaVersion")
+	implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.+'
+	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.+'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.+'
+	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.16.+"
+
+	testImplementation 'org.jetbrains.kotlin:kotlin-test'
+	testImplementation("org.jetbrains.dokka:dokka-test-api:$dokkaVersion")
+	testImplementation("org.jetbrains.dokka:dokka-base-test-utils:$dokkaVersion")
+}
+
+tasks.withType(KotlinCompile).configureEach {
+	compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+}

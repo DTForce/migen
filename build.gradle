@@ -1,6 +1,7 @@
 buildscript {
 	ext {
 		springBootVersion = '3.2.2'
+		dokkaVersion = '1.9.20'
 	}
 	repositories {
 		mavenCentral()
@@ -12,6 +13,12 @@ plugins {
 	id("java-library")
 	id("maven-publish")
 	id("idea")
+	id "org.jetbrains.kotlin.jvm" version "1.9.23"
+	id("org.jetbrains.dokka") version "1.9.20"
+}
+
+ext {
+	javadocJsonDir = file("$buildDir/generated-javadoc-json")
 }
 
 sourceCompatibility = 17
@@ -67,6 +74,29 @@ dependencies {
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+	dokkaPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:$dokkaVersion")
+
+	dokkaPlugin(project(':dokka-json'))
+}
+
+//tasks.withType<DokkaTask>().configureEach {
+//	outputFormat = "auto-restdocs-json"
+//	outputDirectory = javadocJsonDir
+//	configuration {
+//		includeNonPublic = true
+//		reportUndocumented = false
+//	}
+//}
+
+tasks.named("dokkaHtml") {
+	dokkaSourceSets {
+		configureEach {
+			documentedVisibilities.set([Visibility.PUBLIC])
+			// contains descriptions for the module and the packages
+			sourceRoots.from(file("src/main/java"))
+		}
+	}
 }
 
 task sourceJar(type: Jar) {

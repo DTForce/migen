@@ -28,8 +28,14 @@ import java.util.List;
  */
 public interface MigenSqlBuilder extends Cloneable
 {
+	/**
+	 * Clones the sql builder.
+	 */
 	MigenSqlBuilder clone();
+
 	void writeSqlColumnType(Column column);
+
 	void writeSqlPatch(Database currentModel, Database desiredModel, List<ModelChange> changes);
+
 	void setWriter(Writer ex);
 }

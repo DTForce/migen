@@ -99,6 +99,8 @@ tasks.named("dokkaHtml") {
 	}
 }
 
+check.dependsOn(dokkaHtml)
+
 task sourceJar(type: Jar) {
 	from sourceSets.main.allJava
 }

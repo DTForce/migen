@@ -16,46 +16,27 @@
 
 package com.dtforce.dokka.json
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.addSerializer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.dokka.DokkaConfiguration
-import org.jetbrains.dokka.DokkaDefaults
 import org.jetbrains.dokka.DokkaException
-import org.jetbrains.dokka.DokkaSourceSetID
-import org.jetbrains.dokka.DokkaSourceSetImpl
-import org.jetbrains.dokka.ExternalDocumentationLinkImpl
-import org.jetbrains.dokka.PackageOptionsImpl
-import org.jetbrains.dokka.Platform
-import org.jetbrains.dokka.SourceLinkDefinitionImpl
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.renderers.OutputWriter
-import org.jetbrains.dokka.links.DRI
-import org.jetbrains.dokka.model.Bound
-import org.jetbrains.dokka.model.Callable
+import org.jetbrains.dokka.model.DClass
+import org.jetbrains.dokka.model.DClasslike
 import org.jetbrains.dokka.model.DFunction
+import org.jetbrains.dokka.model.DModule
+import org.jetbrains.dokka.model.DPackage
 import org.jetbrains.dokka.model.DParameter
 import org.jetbrains.dokka.model.DProperty
-import org.jetbrains.dokka.model.DTypeParameter
-import org.jetbrains.dokka.model.Documentable
-import org.jetbrains.dokka.model.DocumentableSource
-import org.jetbrains.dokka.model.IsVar
-import org.jetbrains.dokka.model.Modifier
 import org.jetbrains.dokka.model.SourceSetDependent
-import org.jetbrains.dokka.model.Visibility
-import org.jetbrains.dokka.model.WithGenerics
+import org.jetbrains.dokka.model.asPrintableTree
+import org.jetbrains.dokka.model.dfs
 import org.jetbrains.dokka.model.doc.DocumentationNode
-import org.jetbrains.dokka.model.properties.ExtraProperty
-import org.jetbrains.dokka.model.properties.PropertyContainer
-import org.jetbrains.dokka.model.properties.WithExtraProperties
+import org.jetbrains.dokka.model.doc.Text
+import org.jetbrains.dokka.model.withDescendants
 import org.jetbrains.dokka.pages.ModulePageNode
 import org.jetbrains.dokka.pages.RootPageNode
 import org.jetbrains.dokka.plugability.DokkaContext
@@ -63,7 +44,6 @@ import org.jetbrains.dokka.plugability.plugin
 import org.jetbrains.dokka.plugability.querySingle
 import org.jetbrains.dokka.renderers.Renderer
 import org.jetbrains.dokka.transformers.pages.PageTransformer
-import java.io.File
 
 class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
 
@@ -74,38 +54,8 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
     override fun render(root: RootPageNode) {
         val newRoot = preprocessors.fold(root) { acc, t -> t(acc) }
 
-        val module = SimpleModule();
-        module.setMixInAnnotation(IsVar::class.java, IsVarMixin::class.java)
-            .setMixInAnnotation(DProperty::class.java, DPropertyMixin::class.java)
-            .setMixInAnnotation(DokkaSourceSetImpl::class.java, DokkaSourceSetImplMixin::class.java)
-            .addKeySerializer(DokkaConfiguration.DokkaSourceSet::class.java, object : JsonSerializer<DokkaConfiguration.DokkaSourceSet>() {
-                override fun serialize(value: DokkaConfiguration.DokkaSourceSet, gen: JsonGenerator, serializers: SerializerProvider?) {
-                    gen.writeFieldName(value.sourceSetID.toString())
-                }
-            })
-            .addKeySerializer(ExtraProperty.Key::class.java, object : JsonSerializer<ExtraProperty.Key<*, *>>() {
-                override fun serialize(value: ExtraProperty.Key<*, *>, gen: JsonGenerator, serializers: SerializerProvider?) {
-                    gen.writeFieldName(value::class.java.name)
-                }
-            })
-            .addSerializer(DokkaConfiguration.DokkaSourceSet::class.java, object : JsonSerializer<DokkaConfiguration.DokkaSourceSet>() {
-                override fun serialize(value: DokkaConfiguration.DokkaSourceSet, gen: JsonGenerator, serializers: SerializerProvider?) {
-                    gen.writeString(value.sourceSetID.toString())
-                }
-            })
-            .addSerializer(DRI::class.java, object : JsonSerializer<DRI>() {
-                override fun serialize(value: DRI, gen: JsonGenerator, serializers: SerializerProvider?) {
-                    gen.writeString(value.toString())
-                }
-            })
-            .addSerializer(DocumentableSource::class.java, object : JsonSerializer<DocumentableSource>() {
-                override fun serialize(value: DocumentableSource, gen: JsonGenerator, serializers: SerializerProvider) {
-                    gen.writeString(value.path)
-                }
-            })
-
         val objectMapper = ObjectMapper()
-            .registerModules(KotlinModule.Builder().build(), module)
+            .registerModules(KotlinModule.Builder().build())
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 
         val locationProvider =
@@ -117,65 +67,150 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
         }
         if (root is ModulePageNode) {
             runBlocking(Dispatchers.Default) {
-                outputWriter.write(path, objectMapper.writeValueAsString(root.documentables), ".json")
+                val dModule = root.documentables.get(0) as DModule
+                val moduleDocs = convertModule(dModule)
+                outputWriter.write(path, objectMapper.writeValueAsString(moduleDocs), ".json")
             }
         }
     }
+
+    private fun convertModule(dModule: DModule): DokkaJsonModule {
+        return DokkaJsonModule(
+            name = dModule.name,
+            dri = dModule.dri.toString(),
+            documentation = convertMultiDocs(dModule.documentation),
+            packages = dModule.packages.map { convertPackage(it) }
+        )
+    }
+
+    private fun convertPackage(dPackage: DPackage): DokkaJsonPackage {
+        return DokkaJsonPackage(
+            name = dPackage.name,
+            dri = dPackage.dri.toString(),
+            documentation = convertMultiDocs(dPackage.documentation),
+            functions = dPackage.functions.map { convertFunction(it) },
+            classlikes = dPackage.classlikes.map { convertClassLike(it) },
+            properties = dPackage.properties.map { convertProperty(it) }
+        )
+    }
+
+    private fun convertClassLike(dClassLike: DClasslike): DokkaJsonClasslike {
+        return DokkaJsonClasslike(
+            name = dClassLike.name,
+            dri = dClassLike.dri.toString(),
+            documentation = convertMultiDocs(dClassLike.documentation),
+            functions = dClassLike.functions.map { convertFunction(it) },
+            classlikes = dClassLike.classlikes.map { convertClassLike(it) },
+            properties = dClassLike.properties.map { convertProperty(it) },
+            constructors = listOf()
+        )
+            .let {
+                if (dClassLike is DClass) {
+                    it.copy(constructors = dClassLike.constructors.map { convertFunction(it) })
+                } else {
+                    it
+                }
+            }
+    }
+
+    private fun convertProperty(dProperty: DProperty): DokkaJsonProperty {
+        return DokkaJsonProperty(
+            name = dProperty.name,
+            dri = dProperty.dri.toString(),
+            documentation = convertMultiDocs(dProperty.documentation),
+            getter = dProperty.getter?.let { convertFunction(it) },
+            setter = dProperty.setter?.let { convertFunction(it) }
+        )
+    }
+
+    private fun convertMultiDocs(sourceSet: SourceSetDependent<DocumentationNode>): DokkaDocNode? {
+        return sourceSet.entries.singleOrNull()?.value?.let {
+            docNodeToText(it)
+        }
+    }
+
+    private fun docNodeToText(it: DocumentationNode): DokkaDocNode? {
+        val allText = it.withDescendants()
+            .filter { it is Text }
+            .map { it as Text }
+            .map { it.body }
+            .joinToString("\n")
+
+        if (allText.isEmpty()) {
+            return null
+        }
+
+        return DokkaDocNode(allText)
+    }
+
+    private fun convertFunction(dFunction: DFunction): DokkaJsonFunction {
+        return DokkaJsonFunction(
+            name = dFunction.name,
+            dri = dFunction.dri.toString(),
+            documentation = convertMultiDocs(dFunction.documentation),
+            isConstructor = dFunction.isConstructor,
+            parameters = dFunction.parameters.map { convertParameter(it) }
+        )
+    }
+
+    private fun convertParameter(dParameter: DParameter): DokkaJsonParameter {
+        return DokkaJsonParameter(
+            name = dParameter.name,
+            dri = dParameter.dri.toString(),
+            documentation = convertMultiDocs(dParameter.documentation),
+        )
+    }
 }
 
-object IsVarMixin : ExtraProperty<DProperty>, ExtraProperty.Key<DProperty, IsVar> {
-    @JsonIgnore
-    override val key: ExtraProperty.Key<DProperty, *> = this
-}
+data class DokkaDocNode(
+    val asText: String
+)
+
+data class DokkaJsonModule(
+    val name: String,
+    val dri: String,
+    val documentation: DokkaDocNode?,
+    val packages: List<DokkaJsonPackage>,
+)
+
+data class DokkaJsonPackage(
+    val name: String,
+    val dri: String,
+    val documentation: DokkaDocNode?,
+    val functions: List<DokkaJsonFunction>,
+    val properties: List<DokkaJsonProperty>,
+    val classlikes: List<DokkaJsonClasslike>,
+)
 
 
-public data class DPropertyMixin(
-    override val dri: DRI,
-    override val name: String,
-    override val documentation: SourceSetDependent<DocumentationNode>,
-    override val expectPresentInSet: DokkaConfiguration.DokkaSourceSet?,
-    override val sources: SourceSetDependent<DocumentableSource>,
-    override val visibility: SourceSetDependent<Visibility>,
-    override val type: Bound,
-    override val receiver: DParameter?,
-    val setter: DFunction?,
-    val getter: DFunction?,
-    override val modifier: SourceSetDependent<Modifier>,
-    override val sourceSets: Set<DokkaConfiguration.DokkaSourceSet>,
-    override val generics: List<DTypeParameter>,
-    override val isExpectActual: Boolean,
-    @JsonIgnore
-    override val extra: PropertyContainer<DPropertyMixin> = PropertyContainer.empty()
-) : Documentable(), Callable, WithExtraProperties<DPropertyMixin>, WithGenerics {
-    override val children: List<Nothing>
-        get() = emptyList()
+data class DokkaJsonClasslike(
+    val name: String?,
+    val dri: String,
+    val documentation: DokkaDocNode?,
+    val constructors: List<DokkaJsonFunction>,
+    val functions: List<DokkaJsonFunction>,
+    val properties: List<DokkaJsonProperty>,
+    val classlikes: List<DokkaJsonClasslike>,
+)
 
-    override fun withNewExtras(newExtras: PropertyContainer<DPropertyMixin>): DPropertyMixin = copy(extra = newExtras)
-}
+data class DokkaJsonFunction(
+    val name: String,
+    val dri: String,
+    val documentation: DokkaDocNode?,
+    val isConstructor: Boolean,
+    val parameters: List<DokkaJsonParameter>,
+)
 
-data class DokkaSourceSetImplMixin (
-    override val displayName: String = DokkaDefaults.sourceSetDisplayName,
-    override val sourceSetID: DokkaSourceSetID,
-    @JsonIgnore
-    override val classpath: List<File> = emptyList(),
-    override val sourceRoots: Set<File> = emptySet(),
-    override val dependentSourceSets: Set<DokkaSourceSetID> = emptySet(),
-    override val samples: Set<File> = emptySet(),
-    override val includes: Set<File> = emptySet(),
-    @Deprecated("Use [documentedVisibilities] property for a more flexible control over documented visibilities")
-    override val includeNonPublic: Boolean = DokkaDefaults.includeNonPublic,
-    override val reportUndocumented: Boolean = DokkaDefaults.reportUndocumented,
-    override val skipEmptyPackages: Boolean = DokkaDefaults.skipEmptyPackages,
-    override val skipDeprecated: Boolean = DokkaDefaults.skipDeprecated,
-    override val jdkVersion: Int = DokkaDefaults.jdkVersion,
-    override val sourceLinks: Set<SourceLinkDefinitionImpl> = mutableSetOf(),
-    override val perPackageOptions: List<PackageOptionsImpl> = mutableListOf(),
-    override val externalDocumentationLinks: Set<ExternalDocumentationLinkImpl> = mutableSetOf(),
-    override val languageVersion: String? = null,
-    override val apiVersion: String? = null,
-    override val noStdlibLink: Boolean = DokkaDefaults.noStdlibLink,
-    override val noJdkLink: Boolean = DokkaDefaults.noJdkLink,
-    override val suppressedFiles: Set<File> = emptySet(),
-    override val analysisPlatform: Platform = DokkaDefaults.analysisPlatform,
-    override val documentedVisibilities: Set<DokkaConfiguration.Visibility> = DokkaDefaults.documentedVisibilities
-) : DokkaConfiguration.DokkaSourceSet
+data class DokkaJsonProperty(
+    val name: String,
+    val dri: String,
+    val documentation: DokkaDocNode?,
+    val setter: DokkaJsonFunction?,
+    val getter: DokkaJsonFunction?,
+)
+
+data class DokkaJsonParameter(
+    val name: String?,
+    val dri: String,
+    val documentation: DokkaDocNode?
+)

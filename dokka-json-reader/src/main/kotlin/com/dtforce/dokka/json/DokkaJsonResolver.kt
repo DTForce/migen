@@ -10,8 +10,12 @@ import kotlin.reflect.KFunction
 
 object DokkaJsonResolver {
 
-    private val objectMapper = ObjectMapper()
-        .registerModules(KotlinModule.Builder().build())
+    private val objectMapper = createObjectMapper()
+
+    fun createObjectMapper(): ObjectMapper {
+        return ObjectMapper()
+            .registerModules(KotlinModule.Builder().build())
+    }
 
     fun read(path: String): DokkaJsonModule {
         return objectMapper.readValue(File(path))

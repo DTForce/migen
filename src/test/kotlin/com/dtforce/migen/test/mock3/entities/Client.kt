@@ -16,6 +16,9 @@ class Client {
     @Id
     private val id: String? = null
 
+    /**
+     * Comment of authorities.
+     */
     @ElementCollection
     private val authorities: Set<String>? = null
 

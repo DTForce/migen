@@ -1,0 +1,44 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+buildscript {
+    ext {
+        dokkaVersion = '1.9.20'
+    }
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id("java")
+    id("java-library")
+    id "org.jetbrains.kotlin.jvm" version "1.9.23"
+//	id("org.jetbrains.dokka") version "1.9.20"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.16.+'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.+'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.+'
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.16.+"
+
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+}
+
+test {
+    useJUnitPlatform()
+}
+

@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 
 @SpringBootApplication
-@EntityScan("com.dtforce.migen.test.mock2")
+@EntityScan("com.dtforce.migen.test.mock3")
 @EnableMigrationGenerator
 open class Mock3 {
     companion object {

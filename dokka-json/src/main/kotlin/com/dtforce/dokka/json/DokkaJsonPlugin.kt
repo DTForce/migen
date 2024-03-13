@@ -39,8 +39,4 @@ class DokkaJsonPlugin : DokkaPlugin() {
 
     @DokkaPluginApiPreview
     override fun pluginApiPreviewAcknowledgement() = PluginApiPreviewAcknowledgement
-//
-//    val myFilterExtension by extending {
-//        plugin<DokkaBase>().form
-//    }
 }

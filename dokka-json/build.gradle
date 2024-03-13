@@ -11,6 +11,8 @@ buildscript {
 }
 
 plugins {
+	id("java")
+	id("java-library")
 	id "org.jetbrains.kotlin.jvm" version "1.9.23"
 //	id("org.jetbrains.dokka") version "1.9.20"
 }
@@ -28,12 +30,21 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.+'
 	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.16.+"
 
+	implementation(project(":dokka-json-reader"))
+
 	testImplementation 'org.jetbrains.kotlin:kotlin-test'
 	testImplementation("org.jetbrains.dokka:dokka-test-api:$dokkaVersion")
 	testImplementation("org.jetbrains.dokka:dokka-base-test-utils:$dokkaVersion")
 	testImplementation(rootProject)
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 tasks.withType(KotlinCompile).configureEach {
 	compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+}
+
+test {
+	useJUnitPlatform()
 }

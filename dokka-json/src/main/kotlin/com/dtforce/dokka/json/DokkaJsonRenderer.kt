@@ -49,14 +49,12 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
 
     protected val outputWriter: OutputWriter = context.plugin<DokkaBase>().querySingle { outputWriter }
 
-    protected open val preprocessors: Iterable<PageTransformer> = emptyList()
+    protected val preprocessors: Iterable<PageTransformer> = emptyList()
+
+    private val objectMapper = DokkaJsonResolver.createObjectMapper()
 
     override fun render(root: RootPageNode) {
         val newRoot = preprocessors.fold(root) { acc, t -> t(acc) }
-
-        val objectMapper = ObjectMapper()
-            .registerModules(KotlinModule.Builder().build())
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 
         val locationProvider =
             context.plugin<DokkaBase>().querySingle { locationProviderFactory }.getLocationProvider(newRoot)
@@ -161,56 +159,3 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
         )
     }
 }
-
-data class DokkaDocNode(
-    val asText: String
-)
-
-data class DokkaJsonModule(
-    val name: String,
-    val dri: String,
-    val documentation: DokkaDocNode?,
-    val packages: List<DokkaJsonPackage>,
-)
-
-data class DokkaJsonPackage(
-    val name: String,
-    val dri: String,
-    val documentation: DokkaDocNode?,
-    val functions: List<DokkaJsonFunction>,
-    val properties: List<DokkaJsonProperty>,
-    val classlikes: List<DokkaJsonClasslike>,
-)
-
-
-data class DokkaJsonClasslike(
-    val name: String?,
-    val dri: String,
-    val documentation: DokkaDocNode?,
-    val constructors: List<DokkaJsonFunction>,
-    val functions: List<DokkaJsonFunction>,
-    val properties: List<DokkaJsonProperty>,
-    val classlikes: List<DokkaJsonClasslike>,
-)
-
-data class DokkaJsonFunction(
-    val name: String,
-    val dri: String,
-    val documentation: DokkaDocNode?,
-    val isConstructor: Boolean,
-    val parameters: List<DokkaJsonParameter>,
-)
-
-data class DokkaJsonProperty(
-    val name: String,
-    val dri: String,
-    val documentation: DokkaDocNode?,
-    val setter: DokkaJsonFunction?,
-    val getter: DokkaJsonFunction?,
-)
-
-data class DokkaJsonParameter(
-    val name: String?,
-    val dri: String,
-    val documentation: DokkaDocNode?
-)

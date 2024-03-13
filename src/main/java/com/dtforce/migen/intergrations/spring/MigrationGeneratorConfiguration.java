@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
+import com.dtforce.dokka.json.DokkaJsonModule;
 import com.dtforce.migen.MigrationGenerator;
 import com.dtforce.migen.adapter.MetadataAdapter;
 import com.dtforce.migen.adapter.hibernate.HibernateAdapter;
@@ -32,6 +33,7 @@ import com.dtforce.migen.platform.PlatformFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 import javax.sql.DataSource;
 
 @Configuration
@@ -48,10 +50,16 @@ public class MigrationGeneratorConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean
-	public MetadataAdapter metadataAdapter(final HibernateInfoHolder hibernateInfoHolder)
+	public MetadataAdapter metadataAdapter(
+		final HibernateInfoHolder hibernateInfoHolder,
+		final Optional<DokkaJsonModule> dokkaJsonModuleOptional
+	)
 	{
-		// TODO support more adapters
-		return new HibernateAdapter(hibernateInfoHolder, DefaultSchemaFilter.INSTANCE);
+		return new HibernateAdapter(
+			hibernateInfoHolder,
+			DefaultSchemaFilter.INSTANCE,
+			dokkaJsonModuleOptional.orElse(null)
+		);
 	}
 
 	@Bean

@@ -15,11 +15,13 @@
  */
 package com.dtforce.migen.test.mock3.tests
 
+import com.dtforce.dokka.json.DokkaJsonModule
 import com.dtforce.migen.MigrationGenerator
 import com.dtforce.migen.platform.MigenPlatform
 import com.dtforce.migen.platform.MigenSqlBuilder
 import com.dtforce.migen.test.TestTools
 import com.dtforce.migen.test.mock2.spring.Mock2
+import com.dtforce.migen.test.mock3.spring.Mock3
 import org.apache.ddlutils.alteration.AddForeignKeyChange
 import org.apache.ddlutils.alteration.ModelChange
 import org.apache.ddlutils.model.Column
@@ -37,7 +39,7 @@ import java.util.stream.Collectors
 
 @ActiveProfiles("migrationDiff", "disableMigrationCommand")
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(classes = [Mock2::class])
+@SpringBootTest(classes = [Mock3::class])
 @TestPropertySource(properties = [
     "spring.jpa.properties.hibernate.globally_quoted_identifiers = true", // IMPORTANT
     "spring.jpa.properties.hibernate.globally_quoted_identifiers_skip_column_definitions = true", // IMPORTANT
@@ -57,6 +59,9 @@ class Mock3Test {
 
     @Autowired
     private val migenPlatform: MigenPlatform? = null
+
+    @Autowired
+    private val dokkaJsonModule: DokkaJsonModule? = null
 
     private var stringWriter: StringWriter? = null
 
@@ -119,7 +124,9 @@ class Mock3Test {
     fun testComment() {
         val sql = migrationGenerator!!.generateMigrationSQL()
         Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client.description\"\n    IS 'This is a description of the field description.';")
-        Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client\"\n    IS 'This is a description of the table client.';")
+        Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client.path\"\n    IS 'This is a description of the field path.';")
+        Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client_authorities\"\n    IS 'Comment of authorities.';")
+        Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client\"\n    IS 'Client entity.';")
     }
 
     private fun assertColumnType(column: Column?, type: String) {

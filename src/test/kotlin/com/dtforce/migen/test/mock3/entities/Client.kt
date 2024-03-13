@@ -9,9 +9,11 @@ import lombok.Data
 import org.hibernate.annotations.Comment
 import org.hibernate.annotations.Type
 
+/**
+ * Client entity.
+ */
 @Entity
 @Data
-@Comment("This is a description of the table client.")
 class Client {
     @Id
     private val id: String? = null
@@ -22,6 +24,9 @@ class Client {
     @ElementCollection
     private val authorities: Set<String>? = null
 
+    /**
+     * This is a description of the field path.
+     */
     @Column(name = "path", nullable = false, unique = true, columnDefinition = "ltree")
     @Type(value = OtherStringType::class)
     private var path: String? = null

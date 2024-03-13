@@ -84,17 +84,24 @@ dependencies {
 	dokkaPlugin(project(':dokka-json'))
 }
 
-tasks.named("dokkaHtml") {
-	dokkaSourceSets {
-		configureEach {
-			documentedVisibilities.set([Visibility.PUBLIC])
-			// contains descriptions for the module and the packages
-			sourceRoots.from(file("src/main/java"), file("src/test/kotlin"))
-		}
+dokkaHtml {
+	dokkaSourceSets.configureEach {
+		includeNonPublic.set(true)
+		documentedVisibilities.set(
+			[
+					org.jetbrains.dokka.DokkaConfiguration.Visibility.PUBLIC, // Same for both Kotlin and Java
+					org.jetbrains.dokka.DokkaConfiguration.Visibility.PRIVATE, // Same for both Kotlin and Java
+					org.jetbrains.dokka.DokkaConfiguration.Visibility.PROTECTED, // Same for both Kotlin and Java
+					org.jetbrains.dokka.DokkaConfiguration.Visibility.INTERNAL, // Kotlin-specific internal modifier
+					org.jetbrains.dokka.DokkaConfiguration.Visibility.PACKAGE, // Java-specific package-private visibility
+			]
+		)
+		sourceRoots.from(file("src/main/java"))
+		sourceRoots.from(file("src/test/kotlin"))
 	}
 }
 
-check.dependsOn(dokkaHtml)
+test.dependsOn(dokkaHtml)
 
 task sourceJar(type: Jar) {
 	from sourceSets.main.allJava

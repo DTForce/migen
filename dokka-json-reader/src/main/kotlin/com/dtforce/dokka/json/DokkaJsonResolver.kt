@@ -42,4 +42,9 @@ object DokkaJsonResolver {
             ?.classlikes
             ?.singleOrNull { it.name == kClass.simpleName }
     }
+
+    fun resolveProperty(dokkaJsonModule: DokkaJsonModule, kClass: Class<*> , name: String): DokkaJsonProperty? {
+        return resolveClass(dokkaJsonModule, kClass)
+            ?.let { it.properties.filter { it.name == name }.singleOrNull() }
+    }
 }

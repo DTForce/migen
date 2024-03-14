@@ -107,7 +107,7 @@ public class HibernateAdapter implements MetadataAdapter
 		tableResult.setDescription(table.getComment());
 
 		if (dokkaModel != null && table.getComment() == null) {
-			if (entity.isPresent()) {
+			if (entity.isPresent() && entity.get().getMappedClass() != null) {
 				final DokkaJsonClasslike dokkaJsonClasslike = DokkaJsonResolver.INSTANCE
 						.resolveClass(dokkaModel, entity.get().getMappedClass());
 				if (dokkaJsonClasslike == null) {
@@ -261,7 +261,12 @@ public class HibernateAdapter implements MetadataAdapter
 		columnResult.setPrimaryKey(false);
 		columnResult.setDescription(column.getComment());
 
-		if (column.getComment() == null && dokkaModel != null && property.isPresent()) {
+		if (
+			column.getComment() == null &&
+			dokkaModel != null &&
+			property.isPresent() &&
+			property.get().getPersistentClass().getMappedClass() != null
+		) {
 			final Property prop = property.get();
 			var propertyDokka = DokkaJsonResolver.INSTANCE
 					.resolveProperty(dokkaModel, prop.getPersistentClass().getMappedClass(), prop.getName());

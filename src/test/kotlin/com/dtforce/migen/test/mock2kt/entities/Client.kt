@@ -1,4 +1,4 @@
-package com.dtforce.migen.test.mock3.entities
+package com.dtforce.migen.test.mock2kt.entities
 
 import com.dtforce.migen.adapter.hibernate.type.OtherStringType
 import jakarta.persistence.Column

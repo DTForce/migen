@@ -13,14 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.dtforce.migen.test.mock3.tests
+package com.dtforce.migen.test.mock2kt.tests
 
 import com.dtforce.dokka.json.DokkaJsonModule
 import com.dtforce.migen.MigrationGenerator
 import com.dtforce.migen.platform.MigenPlatform
 import com.dtforce.migen.platform.MigenSqlBuilder
 import com.dtforce.migen.test.TestTools
-import com.dtforce.migen.test.mock3.spring.Mock2Kotlin
+import com.dtforce.migen.test.mock2kt.spring.Mock2Kotlin
 import org.apache.ddlutils.alteration.AddForeignKeyChange
 import org.apache.ddlutils.alteration.ModelChange
 import org.apache.ddlutils.model.Column

@@ -1,4 +1,4 @@
-package com.dtforce.migen.test.mock3.spring
+package com.dtforce.migen.test.mock2kt.spring
 
 import com.dtforce.migen.intergrations.spring.EnableMigrationGenerator
 import org.springframework.boot.SpringApplication

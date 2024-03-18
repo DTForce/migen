@@ -1,8 +1,24 @@
 package com.dtforce.dokka.json
 
+@JsonType
+interface DokkaDocPart
+
+data class DokkaDocText(
+    val text: String
+) : DokkaDocPart
+
+data class DokkaDocLink(
+    val dri: String,
+    val text: String
+) : DokkaDocPart
+
+data class DokkaDocParagraph(
+    val docParts: List<DokkaDocPart>
+) : DokkaDocPart
 
 data class DokkaDocNode(
-    val asText: String
+    val asText: String,
+    val paragraphs: List<DokkaDocParagraph>
 )
 
 data class DokkaJsonModule(

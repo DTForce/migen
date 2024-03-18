@@ -76,6 +76,19 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 	}
 
 	@Override
+	protected void processChanges(Database currentModel, Database desiredModel, List changes, CreationParameters params) throws IOException {
+		super.processChanges(currentModel, desiredModel, changes, params);
+		for (Object change : changes) {
+			if (change instanceof ColumnDescriptionChanged) {
+				processColumnCommentChange(currentModel, (ColumnDescriptionChanged) change);
+			}
+			if (change instanceof TableDescriptionChanged) {
+				processTableCommentChange(currentModel, (TableDescriptionChanged) change);
+			}
+		}
+	}
+
+	@Override
 	protected void processTableStructureChanges(
 			Database currentModel,
 			Database desiredModel,

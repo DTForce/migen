@@ -33,8 +33,7 @@ public class TableDescriptionChanged implements TableChange
 	 * Creates a new change object.
 	 *
 	 * @param table   The table of the column
-	 * @param column  The column
-	 * @param comment The JDBC type code of the new type
+	 * @param description The SQL comment of the table
 	 */
 	public TableDescriptionChanged(Table table, String description)
 	{

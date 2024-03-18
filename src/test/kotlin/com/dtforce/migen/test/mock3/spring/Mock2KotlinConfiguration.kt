@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class Mock3Configuration {
+open class Mock2KotlinConfiguration {
     @Bean
     open fun dokkaJsonModule(): DokkaJsonModule {
         return DokkaJsonResolver.read("build/dokka/html/index.json")

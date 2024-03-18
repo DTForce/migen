@@ -32,9 +32,14 @@ import org.jetbrains.dokka.model.DPackage
 import org.jetbrains.dokka.model.DParameter
 import org.jetbrains.dokka.model.DProperty
 import org.jetbrains.dokka.model.SourceSetDependent
+import org.jetbrains.dokka.model.WithChildren
 import org.jetbrains.dokka.model.asPrintableTree
 import org.jetbrains.dokka.model.dfs
+import org.jetbrains.dokka.model.doc.Description
+import org.jetbrains.dokka.model.doc.DocTag
+import org.jetbrains.dokka.model.doc.DocumentationLink
 import org.jetbrains.dokka.model.doc.DocumentationNode
+import org.jetbrains.dokka.model.doc.P
 import org.jetbrains.dokka.model.doc.Text
 import org.jetbrains.dokka.model.withDescendants
 import org.jetbrains.dokka.pages.ModulePageNode
@@ -128,6 +133,43 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
     }
 
     private fun docNodeToText(it: DocumentationNode): DokkaDocNode? {
+
+        val description = it.children.singleOrNull { it is Description } as Description?
+
+        if (description == null) {
+            return null
+        }
+
+        val docParts: List<DokkaDocParagraph> = description.children
+            .filter { it is P }
+            .map {
+                val parts: List<DokkaDocPart?> = it.children.map {
+                    if (it is DocumentationLink) {
+                        DokkaDocLink(
+                            it.dri.toString(),
+                            docTagAsText(it)!!
+                        )
+                    } else if (it is Text) {
+                        docTagAsText(it)?.let { it1 -> DokkaDocText(it1) }
+                    } else {
+                        null
+                    }
+                }
+                return@map parts.filterNotNull()
+            }
+            .map { DokkaDocParagraph(it) }
+
+        if (docParts.isEmpty()) {
+            return null
+        }
+
+        return DokkaDocNode(
+            docTagAsText(description)!!,
+            docParts
+        )
+    }
+
+    private fun docTagAsText(it: WithChildren<*>): String? {
         val allText = it.withDescendants()
             .filter { it is Text }
             .map { it as Text }
@@ -137,8 +179,7 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
         if (allText.isEmpty()) {
             return null
         }
-
-        return DokkaDocNode(allText)
+        return allText
     }
 
     private fun convertFunction(dFunction: DFunction): DokkaJsonFunction {

@@ -25,7 +25,9 @@ class Client {
     private val authorities: Set<String>? = null
 
     /**
-     * This is a description of the field path.
+     * This is a description of the [Client].
+     *
+     * Required field.
      */
     @Column(name = "path", nullable = false, unique = true, columnDefinition = "ltree")
     @Type(value = OtherStringType::class)

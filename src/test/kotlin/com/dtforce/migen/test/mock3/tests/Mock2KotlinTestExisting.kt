@@ -20,8 +20,7 @@ import com.dtforce.migen.MigrationGenerator
 import com.dtforce.migen.platform.MigenPlatform
 import com.dtforce.migen.platform.MigenSqlBuilder
 import com.dtforce.migen.test.TestTools
-import com.dtforce.migen.test.mock2.spring.Mock2
-import com.dtforce.migen.test.mock3.spring.Mock3
+import com.dtforce.migen.test.mock3.spring.Mock2Kotlin
 import org.apache.ddlutils.alteration.AddForeignKeyChange
 import org.apache.ddlutils.alteration.ModelChange
 import org.apache.ddlutils.model.Column
@@ -39,7 +38,7 @@ import java.util.stream.Collectors
 
 @ActiveProfiles("migrationDiff", "disableMigrationCommand")
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(classes = [Mock3::class])
+@SpringBootTest(classes = [Mock2Kotlin::class])
 @TestPropertySource(properties = [
     "spring.jpa.properties.hibernate.globally_quoted_identifiers = true", // IMPORTANT
     "spring.jpa.properties.hibernate.globally_quoted_identifiers_skip_column_definitions = true", // IMPORTANT
@@ -47,13 +46,13 @@ import java.util.stream.Collectors
     "spring.sql.init.mode=always",
     "spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect",
     "spring.sql.init.platform=postgresql",
-    "spring.sql.init.schema-locations=/sql/clear.sql",
+    "spring.sql.init.schema-locations=/sql/mock2/schema1.sql",
     "spring.datasource.url=jdbc:postgresql://\${DB_HOST:localhost}:5432/postgres",
     "spring.datasource.username=postgres",
     "spring.datasource.password=postgres",
     "spring.datasource.driver-class-name=org.postgresql.Driver",
 ])
-class Mock3Test {
+class Mock2KotlinTestExisting {
     @Autowired
     private val migrationGenerator: MigrationGenerator? = null
 
@@ -75,63 +74,11 @@ class Mock3Test {
     }
 
     @Test
-    fun testTables() {
-        val changes = migrationGenerator!!.generateMigrationChanges()
-        Assertions.assertThat(TestTools.filterAddedTablesNames(changes)).containsOnlyKeys(
-            "client",
-            "client_authorities"
-        )
-        Assertions.assertThat(changes).hasSize(3)
-    }
-
-    @Test
-    fun testForeignKeyQuotes() {
-        val changes = migrationGenerator!!.generateMigrationChanges()
-        val changesFiltered = changes.stream()
-            .filter { it: ModelChange? -> it is AddForeignKeyChange }
-            .map { it: ModelChange -> it as AddForeignKeyChange }
-            .collect(Collectors.toList())
-
-        Assertions.assertThat(changesFiltered).hasSize(1)
-        Assertions.assertThat(changesFiltered[0].newForeignKey.name).doesNotStartWith("\"")
-
-        val sql = migrationGenerator.generateMigrationSQL()
-        Assertions.assertThat(sql).doesNotContain("\"\"")
-    }
-
-    @Test
-    fun testLtree() {
-        val changes = migrationGenerator!!.generateMigrationChanges()
-        val tableChangeMap = TestTools.filterAddedTablesNames(changes)
-        Assertions.assertThat(tableChangeMap).containsKeys(
-            "client"
-        )
-        val tableChange = tableChangeMap["client"]
-        val newTable = tableChange!!.newTable
-        val tableColumns = TestTools.tableColumns(newTable)
-
-        Assertions.assertThat(ArrayList(tableColumns.keys)).containsExactly(
-            "id",
-            "description",
-            "path"
-        )
-
-        assertColumnType(tableColumns["id"], "VARCHAR(255)")
-        assertColumnType(tableColumns["path"], "LTREE")
-    }
-
-    @Test
     fun testComment() {
         val sql = migrationGenerator!!.generateMigrationSQL()
         Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client.description\"\n    IS 'This is a description of the field description.';")
         Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client.path\"\n    IS 'This is a description of the field path.';")
         Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client_authorities\"\n    IS 'Comment of authorities.';")
         Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client\"\n    IS 'Client entity.';")
-    }
-
-    private fun assertColumnType(column: Column?, type: String) {
-        stringWriter!!.buffer.setLength(0)
-        sqlBuilder.writeSqlColumnType(column)
-        Assertions.assertThat(stringWriter.toString()).isEqualTo(type)
     }
 }

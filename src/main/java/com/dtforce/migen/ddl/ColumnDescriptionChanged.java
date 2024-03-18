@@ -37,7 +37,7 @@ public class ColumnDescriptionChanged implements ColumnChange
 	 *
 	 * @param table   The table of the column
 	 * @param column  The column
-	 * @param comment The JDBC type code of the new type
+	 * @param description The SQL comment of the column
 	 */
 	public ColumnDescriptionChanged(Table table, Column column, String description)
 	{

@@ -72,7 +72,7 @@ public class CustomModelComparator extends ModelComparator
 		}
 
 		if (!isSameComment(sourceColumn, targetColumn)) {
-			changes.add(new ColumnDescriptionChanged(targetTable, targetColumn, sourceColumn.getDescription()));
+			changes.add(new ColumnDescriptionChanged(targetTable, targetColumn, targetColumn.getDescription()));
 		}
 
 		return changes;
@@ -113,7 +113,7 @@ public class CustomModelComparator extends ModelComparator
 			}
 		});
 		if (!Objects.equals(sourceTable.getDescription(), targetTable.getDescription())) {
-			changes.add(new TableDescriptionChanged(targetTable, sourceTable.getDescription()));
+			changes.add(new TableDescriptionChanged(targetTable, targetTable.getDescription()));
 		}
 		return changes;
 	}

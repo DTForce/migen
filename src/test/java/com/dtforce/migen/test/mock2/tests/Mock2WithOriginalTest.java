@@ -58,7 +58,13 @@ public class Mock2WithOriginalTest
 	public void testTables()
 	{
 		List<ModelChange> changes = migrationGenerator.generateMigrationChanges();
-		assertThat(changes).hasSize(0);
+		assertThat(changes).hasSize(2);
 	}
 
+	@Test
+	public void testComment() {
+		String sql = migrationGenerator.generateMigrationSQL();
+		assertThat(sql).contains("COMMENT ON COLUMN \"client.description\"\n    IS 'This is a description of the field description.';");
+		assertThat(sql).contains("COMMENT ON TABLE \"client\"\n    IS 'This is a description of the table client.';");
+	}
 }

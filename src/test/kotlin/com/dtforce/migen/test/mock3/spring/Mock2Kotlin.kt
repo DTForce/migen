@@ -7,15 +7,15 @@ import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Import
 
 @SpringBootApplication
-@Import(Mock3Configuration::class)
+@Import(Mock2KotlinConfiguration::class)
 @EntityScan("com.dtforce.migen.test.mock3")
 @EnableMigrationGenerator
-open class Mock3 {
+open class Mock2Kotlin {
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            SpringApplication.run(Mock3::class.java)
+            SpringApplication.run(Mock2Kotlin::class.java)
         }
     }
 }

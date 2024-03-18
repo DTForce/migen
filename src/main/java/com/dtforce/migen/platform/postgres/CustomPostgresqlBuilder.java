@@ -398,7 +398,8 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 	{
 		processGenericCommentChange(
 			"COLUMN",
-			this.getTableName(change.getChangedTable()) + "." + this.getColumnName(change.getChangedColumn()),
+			getDelimitedIdentifier(this.getTableName(change.getChangedTable())) + "." +
+				getDelimitedIdentifier(this.getColumnName(change.getChangedColumn())),
 			change.getDescription()
 		);
 		change.apply(currentModel, isCaseSensitive());
@@ -407,7 +408,11 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 	private void processTableCommentChange(Database currentModel, TableDescriptionChanged change)
 		throws IOException
 	{
-		processGenericCommentChange("TABLE", this.getTableName(change.getChangedTable()), change.getDescription());
+		processGenericCommentChange(
+			"TABLE",
+			getDelimitedIdentifier(this.getTableName(change.getChangedTable())),
+			change.getDescription()
+		);
 		change.apply(currentModel, isCaseSensitive());
 	}
 
@@ -415,7 +420,7 @@ public class CustomPostgresqlBuilder extends PostgreSqlBuilder implements MigenS
 		throws IOException
 	{
 		this.print("COMMENT ON " + type.toUpperCase() + " ");
-		this.printlnIdentifier(ident);
+		this.println(ident);
 		this.printIndent();
 		this.print("IS ");
 		if (description != null) {

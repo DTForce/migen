@@ -16,9 +16,6 @@
 
 package com.dtforce.dokka.json
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.dokka.DokkaException
@@ -33,10 +30,8 @@ import org.jetbrains.dokka.model.DParameter
 import org.jetbrains.dokka.model.DProperty
 import org.jetbrains.dokka.model.SourceSetDependent
 import org.jetbrains.dokka.model.WithChildren
-import org.jetbrains.dokka.model.asPrintableTree
-import org.jetbrains.dokka.model.dfs
+import org.jetbrains.dokka.model.doc.CodeInline
 import org.jetbrains.dokka.model.doc.Description
-import org.jetbrains.dokka.model.doc.DocTag
 import org.jetbrains.dokka.model.doc.DocumentationLink
 import org.jetbrains.dokka.model.doc.DocumentationNode
 import org.jetbrains.dokka.model.doc.P
@@ -151,8 +146,10 @@ class DokkaJsonRenderer(private val context: DokkaContext) : Renderer {
                         )
                     } else if (it is Text) {
                         docTagAsText(it)?.let { it1 -> DokkaDocText(it1) }
+                    } else if (it is CodeInline) {
+                        docTagAsText(it)?.let { it1 -> DokkaDocCodeInline(it1) }
                     } else {
-                        null
+                        docTagAsText(it)?.let { it1 -> DokkaDocText(it1) }
                     }
                 }
                 return@map parts.filterNotNull()

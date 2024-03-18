@@ -83,7 +83,7 @@ public class Mock1WithOriginalTest
 			"contract_property_aud",
 			"revinfo"
 		);
-		assertThat(changes).hasSize(12);
+		assertThat(changes).hasSize(11);
 	}
 
 	@Test

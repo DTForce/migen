@@ -18,14 +18,11 @@ package com.dtforce.dokka.json
 
 import org.jetbrains.dokka.CoreExtensions
 import org.jetbrains.dokka.base.DokkaBase
-import org.jetbrains.dokka.base.renderers.RootCreator
 import org.jetbrains.dokka.plugability.DokkaPlugin
 import org.jetbrains.dokka.plugability.DokkaPluginApiPreview
 import org.jetbrains.dokka.plugability.Extension
-import org.jetbrains.dokka.plugability.ExtensionPoint
 import org.jetbrains.dokka.plugability.PluginApiPreviewAcknowledgement
 import org.jetbrains.dokka.renderers.Renderer
-import org.jetbrains.dokka.transformers.pages.PageTransformer
 
 class DokkaJsonPlugin : DokkaPlugin() {
 

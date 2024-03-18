@@ -1,10 +1,12 @@
 package com.dtforce.migen.test.mock2kt.entities
 
 import com.dtforce.migen.adapter.hibernate.type.OtherStringType
+import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
 import lombok.Data
 import org.hibernate.annotations.Comment
 import org.hibernate.annotations.Type
@@ -19,13 +21,14 @@ class Client {
     private val id: String? = null
 
     /**
-     * Comment of authorities.
+     * Authorities setting the content of the JWT claim `authorities` for the given [Client].
      */
     @ElementCollection
+    @Comment("test")
     private val authorities: Set<String>? = null
 
     /**
-     * This is a description of the [Client].
+     * This is a path of the [Client].
      *
      * Required field.
      */

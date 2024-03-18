@@ -21,6 +21,14 @@ object DokkaJsonResolver {
         return objectMapper.readValue(File(path))
     }
 
+    fun driToClassName(dri: String): String {
+        return dri.replace("///PointingToDeclaration/", "").replace("/", ".")
+    }
+
+    fun driToClass(dri: String): Class<*> {
+        return Class.forName(driToClassName(dri))
+    }
+
     fun resolveMethod(dokkaJsonModule: DokkaJsonModule, kFunction1: KFunction<*>, kClass: KClass<*>): DokkaJsonFunction? {
         return resolveClass(dokkaJsonModule, kClass)
             ?.let { it.functions.filter { it.name == kFunction1.name }.singleOrNull() }

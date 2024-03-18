@@ -37,6 +37,9 @@ import org.hibernate.mapping.UniqueKey;
 import org.hibernate.tool.schema.spi.SchemaFilter;
 import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 
+import com.dtforce.dokka.json.DokkaDocCodeInline;
+import com.dtforce.dokka.json.DokkaDocLink;
+import com.dtforce.dokka.json.DokkaDocNode;
 import com.dtforce.dokka.json.DokkaJsonClasslike;
 import com.dtforce.dokka.json.DokkaJsonModule;
 import com.dtforce.dokka.json.DokkaJsonResolver;
@@ -47,6 +50,7 @@ import com.dtforce.migen.ddl.RawTypedColumn;
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class HibernateAdapter implements MetadataAdapter
@@ -113,7 +117,7 @@ public class HibernateAdapter implements MetadataAdapter
 				if (dokkaJsonClasslike == null) {
 					log.warn("Could not find Dokka for Entity {}", entity.get().getMappedClass().getName());
 				} else if (dokkaJsonClasslike.getDocumentation() != null) {
-					tableResult.setDescription(dokkaJsonClasslike.getDocumentation().getAsText());
+					tableResult.setDescription(translateDocumentationToComment(dokkaJsonClasslike.getDocumentation()));
 				}
 			} else if (collectionOpt.isPresent()) {
 				final Collection collection = collectionOpt.get();
@@ -125,7 +129,7 @@ public class HibernateAdapter implements MetadataAdapter
 					if (propertyDokka == null) {
 						log.warn("Could not find Dokka for collection json for {}.{}", collection.getOwner().getMappedClass(), propName.get());
 					} else if (propertyDokka.getDocumentation() != null) {
-						tableResult.setDescription(propertyDokka.getDocumentation().getAsText());
+						tableResult.setDescription(translateDocumentationToComment(propertyDokka.getDocumentation()));
 					}
 				} else {
 					log.warn("Could not determine collection property name for {}.", collection.getRole());
@@ -175,6 +179,48 @@ public class HibernateAdapter implements MetadataAdapter
 			tableResult.addIndex(uniqueIndex);
 		}
 		return tableResult;
+	}
+
+	private String translateDocumentationToComment(final DokkaDocNode documentation)
+	{
+		return documentation.getParagraphs()
+			.stream()
+			.findFirst()
+			.map(dokkaDocParagraph ->
+				dokkaDocParagraph.getDocParts()
+					.stream()
+					.map(dokkaDocPart -> {
+						if (dokkaDocPart instanceof DokkaDocLink link) {
+							return translateDocumentationLink(link);
+						} else if (dokkaDocPart instanceof DokkaDocCodeInline inline) {
+							return putInBackTicks(inline.getText());
+						} else {
+							return dokkaDocPart.getText();
+						}
+					})
+					.collect(Collectors.joining())
+			)
+			.orElse(null);
+	}
+
+	private String translateDocumentationLink(final DokkaDocLink link)
+	{
+		final var metadata = metadata();
+
+		final var first = metadata.getEntityBindings()
+			.stream()
+			.filter(it -> it.getClassName().equals(DokkaJsonResolver.INSTANCE.driToClassName(link.getDri())))
+			.findFirst();
+		if (first.isPresent() && first.get().getTable() != null) {
+			return putInBackTicks(first.get().getTable().getName());
+		} else {
+			return putInBackTicks(link.getText());
+		}
+	}
+
+	private String putInBackTicks(final String text)
+	{
+		return "`" + text + "`";
 	}
 
 	private Optional<String> deduceCollectionPropName(Collection collection) {
@@ -274,7 +320,7 @@ public class HibernateAdapter implements MetadataAdapter
 			if (propertyDokka == null) {
 				log.warn("Could not find Dokka property json for {}.{}", prop.getPersistentClass().getMappedClass().getName(), prop.getName());
 			} else if (propertyDokka.getDocumentation() != null) {
-				columnResult.setDescription(propertyDokka.getDocumentation().getAsText());
+				columnResult.setDescription(translateDocumentationToComment(propertyDokka.getDocumentation()));
 			}
 		}
 

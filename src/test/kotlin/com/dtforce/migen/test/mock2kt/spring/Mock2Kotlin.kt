@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import
 
 @SpringBootApplication
 @Import(Mock2KotlinConfiguration::class)
-@EntityScan("com.dtforce.migen.test.mock3")
+@EntityScan("com.dtforce.migen.test.mock2kt")
 @EnableMigrationGenerator
 open class Mock2Kotlin {
 

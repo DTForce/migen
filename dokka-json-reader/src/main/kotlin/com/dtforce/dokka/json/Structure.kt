@@ -1,20 +1,38 @@
 package com.dtforce.dokka.json
 
-@JsonType
-interface DokkaDocPart
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = DokkaDocLink::class, name = "link"),
+    JsonSubTypes.Type(value = DokkaDocCodeInline::class, name = "code"),
+    JsonSubTypes.Type(value = DokkaDocText::class, name = "text"),
+)
+interface DokkaDocPart {
+    val text: String
+}
 
 data class DokkaDocText(
-    val text: String
+    override val text: String
 ) : DokkaDocPart
 
 data class DokkaDocLink(
     val dri: String,
-    val text: String
+    override val text: String
+) : DokkaDocPart
+
+data class DokkaDocCodeInline(
+    override val text: String
 ) : DokkaDocPart
 
 data class DokkaDocParagraph(
     val docParts: List<DokkaDocPart>
-) : DokkaDocPart
+)
 
 data class DokkaDocNode(
     val asText: String,

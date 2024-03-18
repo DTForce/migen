@@ -71,9 +71,9 @@ class Mock2KotlinTestExisting {
     @Test
     fun testComment() {
         val sql = migrationGenerator!!.generateMigrationSQL()
-        Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client.description\"\n    IS 'This is a description of the field description.';")
-        Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client.path\"\n    IS 'This is a description of the field path.';")
-        Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client_authorities\"\n    IS 'Comment of authorities.';")
+        Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client\".\"description\"\n    IS 'This is a description of the field description.';")
+        Assertions.assertThat(sql).contains("COMMENT ON COLUMN \"client\".\"path\"\n    IS 'This is a path of the `client`.';")
+        Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client_authorities\"\n    IS 'Authorities setting the content of the JWT claim `authorities` for the given `client`.';")
         Assertions.assertThat(sql).contains("COMMENT ON TABLE \"client\"\n    IS 'Client entity.';")
     }
 }

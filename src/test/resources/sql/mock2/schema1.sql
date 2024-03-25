@@ -24,3 +24,4 @@ CREATE INDEX "fk9gbpak3a5886rp59ly8efavha_idx" ON "client_authorities" ("client_
 ALTER TABLE "client_authorities"
   ADD CONSTRAINT "fk9gbpak3a5886rp59ly8efavha" FOREIGN KEY ("client_id") REFERENCES "client" ("id");
 
+COMMENT ON COLUMN "client"."description" IS 'This is a description of the field description.';

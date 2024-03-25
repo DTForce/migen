@@ -44,6 +44,6 @@ public class Client
 	private String path;
 
 	@Column(name = "description", columnDefinition = "text")
-	@Comment("This is a description of the field description.")
+	@Comment("This is a newer description of the field description.")
 	private String description;
 }

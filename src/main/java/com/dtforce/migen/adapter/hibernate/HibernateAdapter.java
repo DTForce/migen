@@ -49,6 +49,7 @@ import com.dtforce.migen.ddl.RawTypedColumn;
 
 import java.sql.Types;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -209,8 +210,14 @@ public class HibernateAdapter implements MetadataAdapter
 
 		final var first = metadata.getEntityBindings()
 			.stream()
-			.filter(it -> it.getClassName().equals(DokkaJsonResolver.INSTANCE.driToClassName(link.getDri())))
+			.filter(
+				it -> Objects.equals(
+					it.getClassName(),
+					DokkaJsonResolver.INSTANCE.driToClassName(link.getDri())
+				)
+			)
 			.findFirst();
+
 		if (first.isPresent() && first.get().getTable() != null) {
 			return putInBackTicks(first.get().getTable().getName());
 		} else {

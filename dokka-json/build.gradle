@@ -17,6 +17,9 @@ plugins {
 //	id("org.jetbrains.dokka") version "1.9.20"
 }
 
+group = 'com.dtforce.migen'
+version = System.getenv("PROJECT_VERSION") ?: 'latest'
+
 repositories {
 	mavenCentral()
 }
@@ -35,7 +38,7 @@ dependencies {
 	testImplementation 'org.jetbrains.kotlin:kotlin-test'
 	testImplementation("org.jetbrains.dokka:dokka-test-api:$dokkaVersion")
 	testImplementation("org.jetbrains.dokka:dokka-base-test-utils:$dokkaVersion")
-	testImplementation(rootProject)
+	testImplementation(project(":migen"))
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

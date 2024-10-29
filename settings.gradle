@@ -1,3 +1,5 @@
 rootProject.name = "migen"
 include("dokka-json")
 include("dokka-json-reader")
+include("migen")
+

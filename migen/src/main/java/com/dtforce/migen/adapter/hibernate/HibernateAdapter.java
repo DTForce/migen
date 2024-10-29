@@ -209,8 +209,12 @@ public class HibernateAdapter implements MetadataAdapter
 
 		final var first = metadata.getEntityBindings()
 			.stream()
-			.filter(it -> it.getClassName().equals(DokkaJsonResolver.INSTANCE.driToClassName(link.getDri())))
+			.filter(
+				it -> it.getClassName() != null &&
+					it.getClassName().equals(DokkaJsonResolver.INSTANCE.driToClassName(link.getDri()))
+			)
 			.findFirst();
+
 		if (first.isPresent() && first.get().getTable() != null) {
 			return putInBackTicks(first.get().getTable().getName());
 		} else {

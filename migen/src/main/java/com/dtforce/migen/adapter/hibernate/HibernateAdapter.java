@@ -50,6 +50,7 @@ import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 import java.sql.Types;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -216,8 +217,10 @@ public class HibernateAdapter implements MetadataAdapter
 		final var first = metadata.getEntityBindings()
 			.stream()
 			.filter(
-				it -> it.getClassName() != null &&
-					it.getClassName().equals(DokkaJsonResolver.INSTANCE.driToClassName(link.getDri()))
+				it -> Objects.equals(
+					it.getClassName(),
+					DokkaJsonResolver.INSTANCE.driToClassName(link.getDri())
+				)
 			)
 			.findFirst();
 

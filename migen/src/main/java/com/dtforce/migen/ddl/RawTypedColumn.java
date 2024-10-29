@@ -52,6 +52,7 @@ public class RawTypedColumn extends Column
 		result.setSizeAndScale(column.getSizeAsInt(), column.getScale());
 		result.setScale(column.getScale());
 		result.setSize(column.getSize());
+		result.setDescription(column.getDescription());
 
 		return result;
 	}

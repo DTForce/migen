@@ -19,8 +19,11 @@ package com.dtforce.migen.test.mock2.spring;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 
 import com.dtforce.migen.intergrations.spring.EnableMigrationGenerator;
+import com.dtforce.migen.platform.postgres.CustomPostgresqlPlatform;
+import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 @SpringBootApplication
 @EntityScan({"com.dtforce.migen.test.mock2"})
@@ -29,5 +32,11 @@ public class Mock2
 {
     public static void main(String[] args) {
 		SpringApplication.run(Mock2.class);
+	}
+
+	@Bean
+	public PlatformTypeMapping platformTypeMapping()
+	{
+		return CustomPostgresqlPlatform.DEFAULT_TYPE_MAPPING;
 	}
 }

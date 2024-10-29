@@ -121,11 +121,15 @@ public class Mock2Test
 		assertThat(new ArrayList<>(tableColumns.keySet())).containsExactly(
 			"id",
 			"description",
-			"path"
+			"path",
+			"state",
+			"tags"
 		);
 
 		assertColumnType(tableColumns.get("id"), "VARCHAR(255)");
 		assertColumnType(tableColumns.get("path"), "LTREE");
+		assertColumnType(tableColumns.get("state"), "INTEGER");
+		assertColumnType(tableColumns.get("tags"), "VARCHAR(255)[]");
 	}
 
 	@Test

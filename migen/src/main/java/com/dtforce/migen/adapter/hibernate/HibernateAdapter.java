@@ -46,11 +46,13 @@ import com.dtforce.dokka.json.DokkaJsonResolver;
 import com.dtforce.migen.adapter.MetadataAdapter;
 import com.dtforce.migen.adapter.hibernate.integration.HibernateInfoHolder;
 import com.dtforce.migen.ddl.RawTypedColumn;
+import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 @Slf4j
 public class HibernateAdapter implements MetadataAdapter
@@ -61,14 +63,18 @@ public class HibernateAdapter implements MetadataAdapter
 
 	private final DokkaJsonModule dokkaModel;
 
+	private final PlatformTypeMapping platformTypeMapping;
+
 	public HibernateAdapter(
 		final HibernateInfoHolder hibernateInfoHolder,
 		final SchemaFilter schemaFilter,
-		final DokkaJsonModule dokkaModel
+		@Nullable final DokkaJsonModule dokkaModel,
+		@Nullable final PlatformTypeMapping platformTypeMapping
 	) {
 		this.hibernateInfoHolder = hibernateInfoHolder;
 		this.schemaFilter = schemaFilter;
 		this.dokkaModel = dokkaModel;
+		this.platformTypeMapping = platformTypeMapping;
 	}
 
 	@Override
@@ -343,12 +349,13 @@ public class HibernateAdapter implements MetadataAdapter
 
 
 		final var jdbcType = jdbcTypeRegistry.findDescriptor(column.getSqlTypeCode(metadata));
+		final var rawCompleteType = column.getSqlType(metadata).toUpperCase();
 		if (jdbcType == null) {
 			columnResult.setTypeCode(Types.OTHER);
-			columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
+			columnResult.setRawCompleteType(rawCompleteType);
 		} else {
 			columnResult.setTypeCode(jdbcType.getJdbcTypeCode());
-			columnResult.setRawCompleteType(column.getSqlType(metadata).toUpperCase());
+			columnResult.setRawCompleteType(rawCompleteType);
 		}
 
 		var size = column.getColumnSize(getDialect(), metadata);
@@ -362,7 +369,11 @@ public class HibernateAdapter implements MetadataAdapter
 				columnResult.setSizeAndScale(size.getPrecision(), size.getScale());
 			}
 		}
-		return columnResult;
+		if (platformTypeMapping != null) {
+			return platformTypeMapping.map(rawCompleteType, columnResult);
+		} else {
+			return columnResult;
+		}
 	}
 
 	private JdbcTypeRegistry getJdbcTypeRegistry()

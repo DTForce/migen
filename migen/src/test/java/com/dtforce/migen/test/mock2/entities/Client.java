@@ -16,16 +16,20 @@
 
 package com.dtforce.migen.test.mock2.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.Data;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.Type;
 
 import com.dtforce.migen.adapter.hibernate.type.OtherStringType;
+import com.dtforce.migen.test.mock2.State;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -46,4 +50,12 @@ public class Client
 	@Column(name = "description", columnDefinition = "text")
 	@Comment("This is a description of the field description.")
 	private String description;
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "state", columnDefinition = "int4")
+	private State state;
+
+	@Column(name = "tags", columnDefinition = "varchar(255)[]")
+	private List<String> tags;
+
 }

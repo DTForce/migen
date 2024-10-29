@@ -8,6 +8,8 @@ CREATE TABLE "client"
   "id" VARCHAR(255) NOT NULL,
   "path" LTREE NOT NULL,
   "description" TEXT,
+  "state" INTEGER,
+  "tags" VARCHAR(255)[],
   PRIMARY KEY ("id")
 );
 

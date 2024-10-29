@@ -30,6 +30,7 @@ import com.dtforce.migen.adapter.hibernate.HibernateAdapter;
 import com.dtforce.migen.adapter.hibernate.integration.HibernateInfoHolder;
 import com.dtforce.migen.platform.MigenPlatform;
 import com.dtforce.migen.platform.PlatformFactory;
+import com.dtforce.migen.platform.type.PlatformTypeMapping;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -52,13 +53,15 @@ public class MigrationGeneratorConfiguration
 	@ConditionalOnMissingBean
 	public MetadataAdapter metadataAdapter(
 		final HibernateInfoHolder hibernateInfoHolder,
-		final Optional<DokkaJsonModule> dokkaJsonModuleOptional
+		final Optional<DokkaJsonModule> dokkaJsonModuleOptional,
+		final Optional<PlatformTypeMapping> platformTypeMapping
 	)
 	{
 		return new HibernateAdapter(
 			hibernateInfoHolder,
 			DefaultSchemaFilter.INSTANCE,
-			dokkaJsonModuleOptional.orElse(null)
+			dokkaJsonModuleOptional.orElse(null),
+			platformTypeMapping.orElse(null)
 		);
 	}
 
